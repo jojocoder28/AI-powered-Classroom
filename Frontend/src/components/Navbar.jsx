@@ -100,7 +100,7 @@ export default function Navbar(props) {
         </div>
         <div
           className={
-            "lg:flex  bg-white lg:bg-transparent lg:shadow-none" +
+            "lg:flex   lg:bg-transparent lg:shadow-none" +
             (navbarOpen ? " block rounded shadow-lg" : " hidden")
           }
           id="example-navbar-warning"
