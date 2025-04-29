@@ -9,6 +9,8 @@ import Classroom from './pages/Classroom';
 import Settings from './pages/Settings'; // Assuming Settings.jsx exists
 import './App.css'; // Assuming you have App.css for basic styling
 
+// --- Context Provider Code Removed --- 
+
 function App() {
   return (
     <BrowserRouter>

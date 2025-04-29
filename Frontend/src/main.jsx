@@ -32,7 +32,8 @@ const AuthProvider = ({ children }) => {
           // setIsAuthenticated(true);
           console.log("Auth: Token found in localStorage, assuming valid for now.");
           // --- Simulation: Assume token is valid, maybe fetch mock user ---
-          // setUser({ name: "Mock User" }); 
+          // For demonstration, let's set a mock user if authenticated
+          setUser({ name: "Mock User", email: "mock@example.com" }); 
           setIsAuthenticated(true); // Already set based on initial state, confirm here
           setToken(storedToken); // Ensure state matches localStorage
         } catch (error) {
@@ -86,7 +87,7 @@ const AuthProvider = ({ children }) => {
   // Don't render children until loading/validation is complete
   return (
     <AuthContext.Provider value={authContextValue}>
-      {!isLoading ? children : <div>Loading...</div>} {/* Show loading indicator */}
+      {!isLoading ? children : <div>Loading Authentication...</div>} {/* Show loading indicator */}
     </AuthContext.Provider>
   );
 };
@@ -94,7 +95,7 @@ const AuthProvider = ({ children }) => {
 // 3. Create the Custom Hook for easy consumption
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (context === undefined || context === null) { // Added null check for robustness
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
