@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '../main'; // Adjust the path based on your file structure
 import { Link } from 'react-router-dom';
+import ThemeSwitch from '../components/ThemeSwitch';
 
 function Home() {
   // Consume the authentication context
@@ -13,6 +14,11 @@ function Home() {
 
   return (
     <div>
+      <ul className="flex flex-col lg:flex-row list-none lg:ml-auto">       
+            <li className="flex items-center">
+             <ThemeSwitch/>
+            </li>
+          </ul>
       <h1>Welcome to the Home Page</h1>
       
       {isAuthenticated ? (
@@ -50,6 +56,7 @@ function Home() {
       {/* You can add more general home page content here */}
       <p style={{ marginTop: '20px' }}>This is the public content of the home page.</p>
     </div>
+
   );
 }
 
