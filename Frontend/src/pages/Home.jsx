@@ -14,11 +14,7 @@ function Home() {
 
   return (
     <div>
-      <ul className="flex flex-col lg:flex-row list-none lg:ml-auto">       
-            <li className="flex items-center">
-             <ThemeSwitch/>
-            </li>
-          </ul>
+                 
       <h1>Welcome to the Home Page</h1>
       
       {isAuthenticated ? (
