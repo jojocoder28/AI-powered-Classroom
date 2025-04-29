@@ -113,13 +113,13 @@ export default function Navbar(props) {
             {isAuthenticated ? (
               <li className="flex items-center">
                 <button
-                className={"  hover:text-teal-500 px-3 py-4 lg:py-2 flex items-center text-xs uppercase font-bold"}
+                className={" cursor-pointer hover:text-teal-500 px-3 py-4 lg:py-2 flex items-center text-xs uppercase font-bold"}
                 onClick={handleLogout}
               >
                 Logout
               </button></li>):(<><li><NavbarElements name="Register" link="register" flag={navbarOpen} /></li>
               <li><button
-                  className={"  hover:text-teal-500 px-3 py-4 lg:py-2 flex items-center text-xs uppercase font-bold"}
+                  className={" cursor-pointer hover:text-teal-500 px-3 py-4 lg:py-2 flex items-center text-xs uppercase font-bold"}
                   onClick={goToLogin}
                 >
                   Login
