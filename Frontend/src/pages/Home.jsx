@@ -39,7 +39,7 @@ function Home() {
 
       {/* --- Temporary Testing Section --- */}
       <div style={{ border: '1px dashed blue', padding: '10px', marginTop: '20px' }}>
-        <h2>Temporary Test Section</h2>
+        <h2 className='text-center text-6xl'>Temporary Test Section</h2>
         <p>Use this link to quickly navigate to the classroom page:</p>
         <Link to="/classroom" style={{ color: 'blue', textDecoration: 'underline' }}>
           Go to Classroom Page
