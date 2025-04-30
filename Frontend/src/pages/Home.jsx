@@ -36,7 +36,7 @@ const Home = () => {
            <div className="relative z-10 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-xl overflow-hidden w-full max-w-md"> 
              {/* Replace with actual image or component */}
              <img
-              src="/placeholder-classroom.jpg" // Replace with your image path
+              src="online-class-env.jpg" // Replace with your image path
               alt="Online Classroom Environment"
               className="rounded-lg object-cover w-full h-64"
              />

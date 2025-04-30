@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Navbar from './components/Navbar';
 import Footer from './components/Footer'; // Import Footer
 import CopyrightElement from './elements/CopyrightElement'; // Import CopyrightElement
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { useAuth } from './main';
 import './App.css'; // Keep existing App styles
 
 // Lazy load pages
@@ -73,11 +73,9 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
       <Router>
         <AppContent />
       </Router>
-    </AuthProvider>
   );
 }
 
