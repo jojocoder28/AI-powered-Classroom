@@ -5,7 +5,7 @@ import { useAuth } from '../main'; // Assuming you have an AuthContext
 
 const Navbar = () => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Check localStorage first
+    // Check localStorage first for the theme preference
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       return savedTheme === 'dark';
@@ -17,11 +17,14 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const root = document.documentElement;
     if (isDarkMode) {
-      document.documentElement.classList.add('dark');
+      // Apply dark theme using data-theme attribute
+      root.setAttribute('data-theme', 'dark');
       localStorage.setItem('theme', 'dark');
     } else {
-      document.documentElement.classList.remove('dark');
+      // Remove data-theme attribute for light theme
+      root.removeAttribute('data-theme');
       localStorage.setItem('theme', 'light');
     }
   }, [isDarkMode]);
@@ -47,17 +50,18 @@ const Navbar = () => {
 
   return (
     <nav className="bg-mint-cream dark:bg-gray-900 shadow-sm sticky top-0 z-50">
+      {/* Note: dark: prefixes in Tailwind will now respond to data-theme="dark" */}
       <div className="container mx-auto px-6 py-3 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="text-2xl font-bold text-teal-700 dark:text-mint-cream">
-          V!dyana {/* Using text logo for now */}
+          V!dyana
         </Link>
 
         {/* Navigation Links & Controls (Desktop) */}
         <div className="hidden md:flex items-center space-x-6">
           <Link to="/" className="text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400">Home</Link>
-          <Link to="/features" className="text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400">Features</Link> {/* Assuming a /features route */}
-          <Link to="/contact" className="text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400">Contact Us</Link> {/* Assuming a /contact route */}
+          <Link to="/features" className="text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400">Features</Link>
+          <Link to="/contact" className="text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400">Contact Us</Link>
 
           <div className="flex items-center space-x-4">
             {/* Auth Buttons or User Info */}
@@ -87,15 +91,15 @@ const Navbar = () => {
                 </Link>
               </>
             )}
-            {/* Theme Switch */}
-            {/* <ThemeSwitch isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} /> */}
+            {/* Theme Switch - Passes state and setter */}
+            <ThemeSwitch isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
           </div>
         </div>
 
         {/* Mobile Controls */}
         <div className="md:hidden flex items-center space-x-3">
-           {/* Theme Switch */}
-           {/* <ThemeSwitch isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} /> */}
+           {/* Theme Switch - Passes state and setter */}
+           <ThemeSwitch isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
            {user ? (
                <button
                     onClick={handleLogout}

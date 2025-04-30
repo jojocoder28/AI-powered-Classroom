@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: 'class', // Enable dark mode using a class
+  // Change darkMode strategy to attribute
+  darkMode: ['attr', 'data-theme'], // Allows using data-theme="dark"
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",

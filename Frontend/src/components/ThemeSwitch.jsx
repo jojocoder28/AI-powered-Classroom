@@ -1,36 +1,27 @@
-import React from 'react'
-import { useState, useEffect } from 'react';
+import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
 
-const ThemeSwitch = () => {
-    const [darkMode, setDarkMode] = useState(() => {
-        // Get the theme from localStorage if it exists
-        const storedMode = localStorage.getItem('darkMode');
-        return storedMode ? JSON.parse(storedMode) : false;
-      });
-      useEffect(() => {
-        if (darkMode) {
-          document.documentElement.classList.add('dark');
-          document.body.classList.add('bg-slate-950'); // Change body background color
-          document.body.classList.add('text-white');
-        } else {
-          document.documentElement.classList.remove('dark');
-          document.body.classList.remove('bg-gray-900');
-          document.body.classList.remove('bg-slate-950'); // Change body background color
-           // Change body background color
-          document.body.classList.remove('text-white');
-        }
-        // Save the theme to localStorage
-        localStorage.setItem('darkMode', JSON.stringify(darkMode));
-      }, [darkMode]);
-    return (
-    <button onClick={() => setDarkMode(!darkMode)} className="text-white text-lg focus:outline-none">
-        <div className={`w-17 h-7 cursor-pointer rounded ${!darkMode ? 'bg-teal-100 shadow-lg' : 'bg-gray-700 shadow-lg'} overflow-hidden absolute top-4 right-4 transition-transform duration-300 transform-gpu`}>
-            <FontAwesomeIcon icon={darkMode ? faMoon : faSun} className="text-slate-950" />
-          </div>
-    </button>
-  )
-}
+// Accept isDarkMode and setIsDarkMode as props
+const ThemeSwitch = ({ isDarkMode, setIsDarkMode }) => {
 
-export default ThemeSwitch
+  // Toggle function calls the setter passed via props
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
+  return (
+    <button
+      onClick={toggleTheme} // Use the toggle function
+      // Add some padding and make it visually distinct
+      className={`p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${isDarkMode ? 'text-yellow-300 hover:text-yellow-400 focus:ring-yellow-400' : 'text-gray-700 hover:text-teal-600 focus:ring-teal-600'}`}
+      aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+    >
+      {/* Use the isDarkMode prop to decide which icon to show */}
+      <FontAwesomeIcon icon={isDarkMode ? faSun : faMoon} size="lg" />
+       {/* Removed the absolutely positioned div wrapper for simplicity and better alignment */}
+    </button>
+  );
+};
+
+export default ThemeSwitch;
