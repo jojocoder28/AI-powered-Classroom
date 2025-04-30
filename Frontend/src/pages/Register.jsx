@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link,Navigate, useNavigate } from 'react-router-dom';
 import { Context } from "../main.jsx";
 import axios from 'axios';
 import { backend_api } from '../config.js'; // Import backend_api instead of server
@@ -98,6 +98,10 @@ function Register() {
       setLoading(false);
     }
   };
+
+  if (isAuthenticated) {
+    return <Navigate to={"/"} />;
+  }
 
   const renderRoleSpecificFields = () => {
     switch (formData.role) {

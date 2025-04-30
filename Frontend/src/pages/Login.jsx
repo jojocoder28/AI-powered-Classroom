@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link,Navigate, useNavigate } from 'react-router-dom';
 import { Context } from '../main';
 import { backend_api } from '../config';
 import axios from 'axios';
@@ -55,6 +55,10 @@ function Login() {
       setLoading(false);
     }
   };
+
+  if (isAuthenticated) {
+    return <Navigate to={"/"} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-200 to-amber-300 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
