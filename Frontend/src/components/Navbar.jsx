@@ -45,7 +45,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.get(`${backend_api}/api/users/logout`, {
+      await axios.post(`${backend_api}/api/users/logout`, {
         withCredentials: true,
       });
       toast.success("Logout successful");
