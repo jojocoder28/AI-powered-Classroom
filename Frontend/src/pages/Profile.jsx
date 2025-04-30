@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Context } from '../main';
 import { backend_api } from '../config';
+import axios from 'axios'; // Import axios
 
 function Profile() {
   const { isAuthenticated, setUser } = useContext(Context);
@@ -15,21 +16,23 @@ function Profile() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${backend_api}/api/users/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
+        // const token = localStorage.getItem('token'); // Token handled by axios withCredentials
+        const res = await axios.get(`${backend_api}/api/users/profile`, {
+          // headers: { Authorization: `Bearer ${token}` }, // Handled by axios withCredentials or interceptor if configured
+          withCredentials: true, // Important for sending cookies/credentials
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Failed to load profile');
-        setProfile(data.user);
-        setFormData(data.user);
+        
+        // Axios automatically parses JSON and throws error for bad status codes
+        setProfile(res.data.user);
+        setFormData(res.data.user);
       } catch (err) {
-        setError(err.message);
+        console.error("Error fetching profile:", err);
+        setError(err.response?.data?.message || 'Failed to load profile');
       }
     };
 
     if (isAuthenticated) fetchProfile();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, backend_api]); // Added backend_api to dependencies
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,32 +51,46 @@ function Profile() {
 
   const handleSave = async () => {
     try {
-      const token = localStorage.getItem('token');
+      // const token = localStorage.getItem('token'); // Token handled by axios withCredentials
       const formPayload = new FormData();
       Object.entries(formData).forEach(([key, val]) => {
-        if (val !== undefined) formPayload.append(key, val);
+        // Only append if the value exists and is different from the original profile data
+         if (profile && val !== profile[key] && val !== undefined) { // Added check for profile
+           formPayload.append(key, val);
+         }
       });
       if (imageFile) {
         formPayload.append('profileImage', imageFile);
       }
 
-      const res = await fetch(`${backend_api}/api/users/profile`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formPayload,
+      // Check if there's anything to update
+       if (!imageFile && formPayload.entries().next().done) { // Check if formPayload is empty
+           setMessage('No changes to save.');
+           setEditMode(false);
+           return;
+       }
+
+      const res = await axios.put(`${backend_api}/api/users/profile`, formPayload, {
+        headers: { 
+           // Axios sets Content-Type for FormData automatically, don't override
+          // Authorization: `Bearer ${token}` // Handled by axios withCredentials or interceptor if configured
+        },
+        withCredentials: true,
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Failed to update profile');
-
+      // Axios automatically parses JSON and throws error for bad status codes
       setMessage('Profile updated successfully!');
-      setUser(data.user);
-      setProfile(data.user);
+      setUser(res.data.user);
+      setProfile(res.data.user);
       setPreviewImage(null);
       setImageFile(null);
       setEditMode(false);
+      setError(''); // Clear any previous errors on success
+
     } catch (err) {
-      setError(err.message);
+      console.error("Error updating profile:", err);
+      setError(err.response?.data?.message || 'Failed to update profile');
+      setMessage(''); // Clear any previous success message on error
     }
   };
 
