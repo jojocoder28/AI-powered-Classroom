@@ -30,7 +30,7 @@ const ChatSection = ({ classroomId }) => {
   };
 
   return (
-    <div className="border rounded p-4 h-96 flex flex-col bg-gray-50">
+    <div className="border rounded p-4 h-96 flex flex-col">
       <h3 className="text-lg font-semibold mb-2">Chat</h3>
       <div className="flex-grow overflow-y-auto mb-2 border-b pb-2">
         {messages.length > 0 ? (
@@ -61,7 +61,7 @@ const VideoCallSection = ({ classroom }) => {
   // TODO: Get the actual video call link, perhaps stored in the classroom object
   const videoLink = classroom?.videoLink || '#'; // Placeholder
   return (
-    <div className="border rounded p-4 my-4 bg-gray-50">
+    <div className="border rounded p-4 my-4 ">
       <h3 className="text-lg font-semibold mb-2">Video Call</h3>
       {videoLink !== '#' ? (
         <a 
@@ -114,7 +114,7 @@ const AssignmentsSection = ({ classroomId }) => {
   };
 
   return (
-    <div className="border rounded p-4 my-4 bg-gray-50">
+    <div className="border rounded p-4 my-4 ">
       <h3 className="text-lg font-semibold mb-2">Assignments / Files</h3>
       <div className="mb-4">
         <h4 className="font-medium mb-1">Uploaded Files:</h4>
@@ -228,9 +228,9 @@ function Classroom() {
   }
 
   return (
-    <div className="flex h-screen p-4 space-x-4 bg-gray-100">
+    <div className="flex h-screen p-4 space-x-4 ">
       {/* Left Panel: Classroom List and Actions */} 
-      <div className="w-1/3 border rounded p-4 bg-white flex flex-col">
+      <div className="w-1/3 border rounded p-4  flex flex-col">
         <h2 className="text-xl font-bold mb-4">Classrooms</h2>
         <div className="mb-4 flex space-x-2">
           <button 
@@ -253,7 +253,7 @@ function Classroom() {
                 <li 
                   key={room.id} 
                   onClick={() => setSelectedClassroom(room)}
-                  className={`p-2 rounded cursor-pointer hover:bg-gray-200 ${selectedClassroom?.id === room.id ? 'bg-blue-100 font-semibold' : ''}`}
+                  className={`p-2 rounded cursor-pointer  hover:bg-gray-500 ${selectedClassroom?.id === room.id ? 'bg-blue-100 text-black font-semibold' : ''}`}
                 >
                   {room.name}
                   <p className="text-xs text-gray-600">{room.description}</p>
@@ -267,7 +267,7 @@ function Classroom() {
       </div>
 
       {/* Right Panel: Selected Classroom Details */} 
-      <div className="w-2/3 border rounded p-4 bg-white overflow-y-auto">
+      <div className="w-2/3 border rounded p-4  overflow-y-auto">
         {selectedClassroom ? (
           <div>
             <h2 className="text-2xl font-bold mb-4">{selectedClassroom.name}</h2>
