@@ -1,49 +1,83 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
+import React, { Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
-// import NotFound from './components/NotFound';
-import CopyrightElement from './elements/CopyrightElement';
-import { ToastContainer} from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Profile from './pages/Profile';
-import Dashboard from './pages/Dashboard'; // Assuming Dashboard.jsx exists
-import Classroom from './pages/Classroom';
-import Settings from './pages/Settings'; // Assuming Settings.jsx exists
-import './App.css'; // Assuming you have App.css for basic styling
+import Footer from './components/Footer'; // Import Footer
+import CopyrightElement from './elements/CopyrightElement'; // Import CopyrightElement
+import { AuthProvider, useAuth } from './context/AuthContext';
+import './App.css'; // Keep existing App styles
 
-// --- Context Provider Code Removed --- 
+// Lazy load pages
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Classroom = lazy(() => import('./pages/Classroom'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Settings = lazy(() => import('./pages/Settings'));
+
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    // Optional: Show a loading spinner while checking auth state
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
+
+  return user ? children : <Navigate to="/login" replace />;
+};
+
+function AppContent() {
+  return (
+    <div className="flex flex-col min-h-screen bg-mint-cream dark:bg-gray-900">
+      <Navbar />
+      <main className="flex-grow">
+        <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading Page...</div>}>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            {/* Add other public routes like /features, /contact if needed */}
+             <Route path="/features" element={<div>Features Page Placeholder</div>} />
+             <Route path="/contact" element={<div>Contact Page Placeholder</div>} />
+
+            {/* Protected Routes */}
+            <Route
+              path="/dashboard"
+              element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+            />
+            <Route
+              path="/classroom/:roomId"
+              element={<ProtectedRoute><Classroom /></ProtectedRoute>}
+            />
+             <Route
+              path="/profile"
+              element={<ProtectedRoute><Profile /></ProtectedRoute>}
+            />
+            <Route
+              path="/settings"
+              element={<ProtectedRoute><Settings /></ProtectedRoute>}
+            />
+
+            {/* Redirect any unknown paths to home or a 404 page */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </main>
+      <Footer /> {/* Add Footer component */}
+      <CopyrightElement /> {/* Add CopyrightElement */}
+    </div>
+  );
+}
 
 function App() {
   return (
-    <BrowserRouter>
-      {/* You can add a Navbar or Header component here, outside the Routes,
-          so it appears on all pages */}
-      {/* <Navbar /> */}
-      <Navbar transparent/>
-
-      <Routes>
-        {/* Define your routes here */}
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/classroom" element={<Classroom />} />
-        <Route path="/settings" element={<Settings />} />
-
-
-        {/* Add a catch-all route for 404 Not Found pages */}
-        {/* <Route path="*" element={<NotFound />} /> */}
-      </Routes>
-      <CopyrightElement name="Vidyana" link="/"/>
-      <ToastContainer position='top-center' />
-      
-      {/* You can add a Footer component here, outside the Routes */}
-      {/* <Footer /> */}
-    </BrowserRouter>
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
   );
 }
 

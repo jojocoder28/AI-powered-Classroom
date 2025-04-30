@@ -1,1 +1,19 @@
-@import "tailwindcss";
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Import Font Awesome */
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+
+/* Global styles if needed */
+body {
+  @apply font-sans;
+}
+
+/* You might want to add styles for the specific fonts used in the image if available */
+/* Example:
+@import url('https://fonts.googleapis.com/css2?family=YourFontName:wght@400;700&display=swap');
+body {
+  font-family: 'YourFontName', sans-serif;
+}
+*/
