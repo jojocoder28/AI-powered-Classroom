@@ -30,8 +30,11 @@ function Login() {
       // ---- Login Success ----
       console.log('Login successful:', response.data);
 
-      // 1. Store the token (e.g., in localStorage)
-      localStorage.setItem('token', response.data.token);
+      // 1. Store the token in a cookie
+      const token = response.data.token;
+      const expires = new Date();
+      expires.setDate(expires.getDate() + 7); // Set cookie to expire in 7 days
+      document.cookie = `token=${token}; expires=${expires.toUTCString()}; path=/`;
 
       // 2. Update authentication state in context
       setIsAuthenticated(true);
@@ -45,8 +48,9 @@ function Login() {
       setError(err.response?.data?.message || err.message || 'Failed to login');
       console.error('Login error:', err);
       setIsAuthenticated(false); // Ensure state is false on error
-      setUser([]);
-      localStorage.removeItem('token'); // Clear token on error
+      setUser({}); // Use empty object for user state
+      // 4. Remove the token cookie on error
+      document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     } finally {
       setLoading(false);
     }
