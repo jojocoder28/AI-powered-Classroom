@@ -4,6 +4,7 @@ const asyncHandler = require("express-async-handler");
 const streamifier = require('streamifier'); // To convert buffer to stream
 const cloudinary = require("../cloudinary"); // Import Cloudinary config
 const UserImage = require("../model/UserImage"); // Import the new UserImage model
+const generateToken = require("../utils/generateToken.js"); // Import generateToken utility
 
 // Import the destructured models from User.js
 const { User, Student, Teacher, Admin } = require("../model/User");
@@ -190,17 +191,15 @@ const userCtrl = {
         throw new Error(error.message || "Registration failed due to an unexpected error.");
     }
 
-    //! Construct response
-    const responseData = userCreated.toObject();
-    delete responseData.password;
-    delete responseData.__v;
-    if (cloudinaryResult) {
-      responseData.profileImageUrl = cloudinaryResult.secure_url; // Add image URL to response
-    }
+    // Generate the token after user is successfully created and saved
+    const token = jwt.sign({ id: userCreated._id, role: userCreated.role }, process.env.JWT_SECRET, {
+      expiresIn: "30d", 
+    });
 
-    //!Send the response
-    console.log("User Registration Successful:", responseData);
-    res.status(201).json({success:true, responseData});
+    //!Send the response using generateToken
+    console.log("User Registration Successful, generating token...");
+    generateToken(userCreated, token, "Registration Successful", 201, res);
+
   }),
 
   //!Login
@@ -223,24 +222,18 @@ const userCtrl = {
         res.status(401); throw new Error("Invalid credentials");
     }
 
-    // Fetch profile image URL if it exists
-    const userImage = await UserImage.findOne({ user: user._id });
+    // Fetch profile image URL if it exists (optional, can fetch on profile view)
+    // const userImage = await UserImage.findOne({ user: user._id });
 
-    //! Generate the token
+    // Generate the token after successful login
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: "30d", 
     });
 
-    //!Send the response
-    res.json({
-      message: "Login success",
-      token,
-      id: user._id,
-      email: user.email,
-      username: user.username,
-      role: user.role,
-      profileImageUrl: userImage ? userImage.imageUrl : null // Include image URL in login response
-    });
+    //! Generate and send the token using generateToken
+    console.log("Login successful, generating token...");
+    generateToken(user, token, "Login success", 200, res); // Pass user object directly
+
   }),
 
   //!Profile
@@ -320,7 +313,6 @@ const userCtrl = {
       userProfile.profileImageUrl = userImage ? userImage.imageUrl : null;
 
       res.status(200).json({
-        success: true,
         message: "Profile updated successfully",
         user: userProfile, // Send updated profile with image URL
       });
@@ -335,5 +327,29 @@ const userCtrl = {
     }
   }),
 
+  //!Logout
+  logout: asyncHandler(async (req, res) => {
+    res.cookie('adminToken', '', {
+      httpOnly: true,
+      expires: new Date(0),
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'None',
+    });
+    res.cookie('teacherToken', '', { // Corrected cookie name
+      httpOnly: true,
+      expires: new Date(0),
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'None',
+    });
+    res.cookie('studentToken', '', { // Corrected cookie name
+      httpOnly: true,
+      expires: new Date(0),
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'None',
+    });
+    res.status(200).json({
+      message: 'Logged out successfully',
+    });
+  }),
 };
 module.exports = userCtrl;

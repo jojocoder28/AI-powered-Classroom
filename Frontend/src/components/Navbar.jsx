@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import ThemeSwitch from './ThemeSwitch'; // Import ThemeSwitch
 import { Context } from '../main'; // Assuming you have an AuthContext
 import { toast } from "react-toastify";
 
@@ -17,7 +16,7 @@ const Navbar = () => {
     // Otherwise, check system preference
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
-  const { user, logout } = useContext(Context);; // Get user state and logout function
+  const { user } = useContext(Context);; // Get user state and logout function
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -87,7 +86,7 @@ const Navbar = () => {
                 <span className="text-gray-700 dark:text-gray-300">Welcome, {user.name}!</span>
                  <button
                     onClick={handleLogout}
-                    className="px-4 py-2 text-sm text-teal-600 border border-teal-600 rounded-md hover:bg-teal-50 dark:text-teal-400 dark:border-teal-400 dark:hover:bg-gray-800"
+                    className="cursor-pointer px-4 py-2 text-sm text-teal-600 border border-teal-600 rounded-md hover:bg-teal-50 dark:text-teal-400 dark:border-teal-400 dark:hover:bg-gray-800"
                   >
                    Logout
                  </button>
@@ -109,18 +108,16 @@ const Navbar = () => {
               </>
             )}
             {/* Theme Switch */}
-            {/* <ThemeSwitch isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} /> */}
           </div>
         </div>
 
         {/* Mobile Controls */}
         <div className="md:hidden flex items-center space-x-3">
            {/* Theme Switch */}
-           {/* <ThemeSwitch isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} /> */}
            {user ? (
                <button
                     onClick={handleLogout}
-                    className="px-3 py-1 text-sm text-teal-600 border border-teal-600 rounded-md hover:bg-teal-50 dark:text-teal-400 dark:border-teal-400 dark:hover:bg-gray-800"
+                    className="cursor-pointer px-3 py-1 text-sm text-teal-600 border border-teal-600 rounded-md hover:bg-teal-50 dark:text-teal-400 dark:border-teal-400 dark:hover:bg-gray-800"
                   >
                    Logout
                  </button>

@@ -23,4 +23,7 @@ router.get('/profile', isAuthenticated, userCtrl.profile);
 // If you want image update here too, add: upload.single('profileImage')
 router.put('/profile', isAuthenticated, /* upload.single('profileImage'), */ userCtrl.updateProfile);
 
+// Logout User
+router.post('/logout', userCtrl.logout);
+
 module.exports = router;
