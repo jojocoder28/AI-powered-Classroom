@@ -66,7 +66,7 @@ function AppContent() {
         </Suspense>
       </main>
       <Footer /> {/* Add Footer component */}
-      <CopyrightElement /> {/* Add CopyrightElement */}
+      <CopyrightElement name='Vidyana' link="/" /> {/* Add CopyrightElement */}
     </div>
   );
 }

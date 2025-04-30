@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ThemeSwitch from './ThemeSwitch'; // Import ThemeSwitch
-import { useAuth } from '../context/AuthContext'; // Assuming you have an AuthContext
+import { useAuth } from '../main'; // Assuming you have an AuthContext
 
 const Navbar = () => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -88,14 +88,14 @@ const Navbar = () => {
               </>
             )}
             {/* Theme Switch */}
-            <ThemeSwitch isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
+            {/* <ThemeSwitch isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} /> */}
           </div>
         </div>
 
         {/* Mobile Controls */}
         <div className="md:hidden flex items-center space-x-3">
            {/* Theme Switch */}
-           <ThemeSwitch isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
+           {/* <ThemeSwitch isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} /> */}
            {user ? (
                <button
                     onClick={handleLogout}
