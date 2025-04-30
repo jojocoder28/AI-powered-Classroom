@@ -26,7 +26,7 @@ function Home() {
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
           {/* Logo */}
           <div className="text-2xl font-extrabold text-indigo-700 dark:text-white tracking-tight">
-            EduRights
+          Vidyana
           </div>
 
           {/* Right: Theme + Auth Buttons */}

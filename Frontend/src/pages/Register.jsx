@@ -77,7 +77,7 @@ function Register() {
 
     try {
       const response = await axios.post(
-        `${backend_api}/users/register`, // Use backend_api here
+        `${backend_api}/api/users/register`, // Use backend_api here
         submissionData,
         {
           headers: {},
