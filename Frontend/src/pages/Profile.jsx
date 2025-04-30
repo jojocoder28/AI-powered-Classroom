@@ -21,7 +21,7 @@ function Profile() {
           // headers: { Authorization: `Bearer ${token}` }, // Handled by axios withCredentials or interceptor if configured
           withCredentials: true, // Important for sending cookies/credentials
         });
-        
+
         // Axios automatically parses JSON and throws error for bad status codes
         setProfile(res.data.user);
         setFormData(res.data.user);
@@ -67,6 +67,7 @@ function Profile() {
        if (!imageFile && formPayload.entries().next().done) { // Check if formPayload is empty
            setMessage('No changes to save.');
            setEditMode(false);
+           setError(''); // Clear any previous errors
            return;
        }
 
@@ -98,7 +99,7 @@ function Profile() {
     return <p className="text-center text-red-600">Please log in to view your profile.</p>;
   }
 
-  if (!profile) return <p className="text-center">Loading profile...</p>;
+  if (!profile) return <p className="text-center text-gray-700 dark:text-gray-300">Loading profile...</p>;
 
   const roleFields = {
     Student: ['firstName', 'lastName', 'university', 'department'],
@@ -107,107 +108,104 @@ function Profile() {
   };
 
   return (
-    <div className="container mx-auto p-6 md:p-10 bg-gray-100 dark:bg-gray-800 rounded-xl shadow-lg">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">User Profile</h1>
+    <div className="container mx-auto p-6 md:p-10 bg-mint-cream dark:bg-gray-900 rounded-xl shadow-lg">
+      <h1 className="text-3xl font-bold mb-6 text-teal-800 dark:text-mint-cream">User Profile</h1>
 
       {message && <p className="text-green-600 mb-4">{message}</p>}
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
-      <div className="flex flex-col items-center space-y-4">
-        <img
-          src={previewImage || profile.profileImageUrl}
-          alt="Profile"
-          className="w-32 h-32 rounded-full border-2 border-amber-400 shadow-md object-cover"
-        />
+      <div className="flex flex-col items-center space-y-6">
+        <div className="relative">
+          <img
+            src={previewImage || profile.profileImageUrl}
+            alt="Profile"
+            className="w-36 h-36 rounded-full object-cover border-4 border-teal-500 shadow-lg"
+          />
+          {editMode && (
+             <div className="absolute bottom-0 right-0 bg-teal-500 rounded-full p-2 cursor-pointer shadow-md hover:bg-teal-600 transition duration-300" onClick={() => document.getElementById('profile-image-input')?.click()}>
+                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A1 1 0 0011.381 3H8.618a1 1 0 00-.707.293L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                 </svg>
+             </div>
+          )}
+           <input
+              id="profile-image-input"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl mt-4">
-          <div className="neomorphic-inset px-4 py-3 rounded-md text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-gray-700">
+        {imageFile && editMode && (
+            <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">New image selected: {imageFile.name}</p>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl mt-4 text-gray-800 dark:text-gray-200">
+          <div className="px-4 py-3 rounded-md bg-white dark:bg-gray-700 shadow-sm">
             <strong>Username:</strong> {profile.username}
           </div>
-          <div className="neomorphic-inset px-4 py-3 rounded-md text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-gray-700">
+          <div className="px-4 py-3 rounded-md bg-white dark:bg-gray-700 shadow-sm">
             <strong>Email:</strong> {profile.email}
           </div>
-          <div className="neomorphic-inset px-4 py-3 rounded-md text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-gray-700">
+          <div className="px-4 py-3 rounded-md bg-white dark:bg-gray-700 shadow-sm">
             <strong>Role:</strong> {profile.role}
           </div>
-          <div className="neomorphic-inset px-4 py-3 rounded-md text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-gray-700">
+          <div className="px-4 py-3 rounded-md bg-white dark:bg-gray-700 shadow-sm">
             <strong>Phone:</strong> {profile.phoneNumber}
           </div>
 
           {roleFields[profile.role]?.map((field) => (
-            <div key={field} className="neomorphic-inset px-4 py-3 rounded-md text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-gray-700">
+            <div key={field} className="px-4 py-3 rounded-md bg-white dark:bg-gray-700 shadow-sm">
               <strong>{field.charAt(0).toUpperCase() + field.slice(1)}:</strong> {profile[field] || 'N/A'}
             </div>
           ))}
         </div>
 
         {editMode && (
-          <div className="w-full max-w-lg mt-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Edit Profile</h2>
-
-            <div className="mb-4">
-              <label className="block text-gray-600 dark:text-gray-300 mb-1">Update Profile Image</label>
-              <div className="flex items-center space-x-4">
-                <button
-                  type="button"
-                  onClick={() => document.getElementById('profile-image-input')?.click()}
-                  className="px-4 py-2 bg-amber-500 text-white rounded-md hover:bg-amber-600"
-                >
-                  Choose Photo
-                </button>
-                <input
-                  id="profile-image-input"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-                {imageFile && (
-                  <span className="text-sm text-gray-600 dark:text-gray-300">
-                    {imageFile.name}
-                  </span>
-                )}
-              </div>
-            </div>
+          <div className="w-full max-w-lg mt-6 bg-white dark:bg-gray-700 p-6 rounded-xl shadow-lg">
+            <h2 className="text-xl font-semibold mb-4 text-teal-800 dark:text-mint-cream">Edit Profile</h2>
 
             {roleFields[profile.role]?.map((field) => (
               <div key={field} className="mb-4">
-                <label className="block text-gray-600 dark:text-gray-300 capitalize mb-1">{field}</label>
+                <label className="block text-gray-700 dark:text-gray-300 capitalize mb-1">{field}</label>
                 <input
                   type="text"
                   name={field}
                   value={formData[field] || ''}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-md bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                  className="w-full px-4 py-2 rounded-md bg-mint-cream dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-900 dark:text-gray-100"
                 />
               </div>
             ))}
 
             <div className="mb-4">
-              <label className="block text-gray-600 dark:text-gray-300">Phone Number</label>
+              <label className="block text-gray-700 dark:text-gray-300">Phone Number</label>
               <input
                 type="text"
                 name="phoneNumber"
                 value={formData.phoneNumber || ''}
                 onChange={handleChange}
-                className="w-full px-4 py-2 rounded-md bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                className="w-full px-4 py-2 rounded-md bg-mint-cream dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-900 dark:text-gray-100"
               />
             </div>
 
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 justify-end">
               <button
                 onClick={handleSave}
-                className="px-6 py-2 bg-amber-500 text-white rounded-md hover:bg-amber-600"
+                className="px-6 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-150"
               >
-                Save
+                Save Changes
               </button>
               <button
                 onClick={() => {
                   setEditMode(false);
                   setPreviewImage(null);
                   setImageFile(null);
+                  setError(''); // Clear error on cancel
+                  setMessage(''); // Clear message on cancel
                 }}
-                className="px-6 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-700"
+                className="px-6 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-150"
               >
                 Cancel
               </button>
@@ -218,7 +216,7 @@ function Profile() {
         {!editMode && (
           <button
             onClick={() => setEditMode(true)}
-            className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            className="mt-4 px-6 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-150"
           >
             Edit Profile
           </button>

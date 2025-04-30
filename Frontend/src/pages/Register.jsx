@@ -136,15 +136,15 @@ function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-300 to-orange-300 dark:bg-gradient-to-br dark:from-purple-700 dark:to-blue-700 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-lg w-full space-y-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+    <div className="min-h-screen bg-gradient-to-br from-teal-100 to-teal-300 dark:bg-gradient-to-br dark:from-gray-800 dark:to-teal-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-lg w-full space-y-8 bg-white dark:bg-gray-700 rounded-xl shadow-lg p-8">
         <div>
           <div className="flex justify-center">
-            <div className="rounded-full bg-gradient-to-tr from-pink-500 to-orange-500 dark:from-purple-400 dark:to-blue-400 h-12 w-12 flex items-center justify-center">
+            <div className="rounded-full bg-gradient-to-tr from-teal-500 to-teal-700 dark:from-teal-600 dark:to-teal-800 h-12 w-12 flex items-center justify-center">
                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
             </div>
           </div>
-          <h2 className="mt-6 text-center text-2xl font-extrabold text-gray-900 dark:text-white">
+          <h2 className="mt-6 text-center text-2xl font-extrabold text-teal-800 dark:text-mint-cream">
             Create an Account
           </h2>
         </div>
@@ -157,7 +157,7 @@ function Register() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
            <div>
              <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
-             <select id="role" name="role" required value={formData.role} onChange={handleChange} className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md">
+             <select id="role" name="role" required value={formData.role} onChange={handleChange} className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-md">
                <option value="Student">Student</option>
                <option value="Teacher">Teacher</option>
                <option value="Admin">Admin</option>
@@ -171,17 +171,17 @@ function Register() {
           <InputField label="Confirm Password" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} required autoComplete="new-password"/>
            <div>
              <label htmlFor="profileImage" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Profile Image (Optional)</label>
-             <input id="profileImage" name="profileImage" type="file" accept="image/*" onChange={handleFileChange} className="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 dark:file:bg-gray-700 file:text-pink-700 dark:file:text-pink-300 hover:file:bg-pink-100 dark:hover:file:bg-gray-600"/>
+             <input id="profileImage" name="profileImage" type="file" accept="image/*" onChange={handleFileChange} className="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 dark:file:bg-gray-700 file:text-teal-700 dark:file:text-teal-300 hover:file:bg-teal-100 dark:hover:file:bg-gray-600"/>
            </div>
           <div>
-            <button type="submit" disabled={loading} className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-tr from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <button type="submit" disabled={loading} className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-tr from-teal-600 to-teal-800 hover:from-teal-700 hover:to-teal-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
               {loading ? 'Registering...' : 'Register'}
             </button>
           </div>
         </form>
         <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
           Already have an account?{' '}
-          <Link to="/login" className="font-medium text-pink-600 hover:text-pink-500 dark:text-pink-400 dark:hover:text-pink-300">
+          <Link to="/login" className="font-medium text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300">
             Sign in
           </Link>
         </div>
@@ -193,7 +193,7 @@ function Register() {
 const InputField = ({ label, name, type = 'text', value, onChange, required = false, autoComplete = 'off' }) => (
   <div>
     <label htmlFor={`register-${name}`} className="sr-only">{label}</label>
-    <input id={`register-${name}`} name={name} type={type} autoComplete={autoComplete} required={required} className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm" placeholder={label} value={value} onChange={onChange}/>
+    <input id={`register-${name}`} name={name} type={type} autoComplete={autoComplete} required={required} className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm bg-mint-cream dark:bg-gray-800" placeholder={label} value={value} onChange={onChange}/>
   </div>
 );
 
