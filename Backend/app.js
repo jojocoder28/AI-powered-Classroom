@@ -8,10 +8,13 @@ const router = require("./routes/users");
 const conferenceRouter = require("./routes/conferenceRouter");
 const { initializeSocket } = require("./controller/conferenceController");
 const errorHandler = require("./middlewares/errorHandler");
+const cookieParser = require('cookie-parser');
 
 dotenv.config();
 const dburl = process.env.MONGO_URI;
 const app = express();
+app.use(cookieParser());
+
 const server = http.createServer(app); // Create HTTP server for Socket.io
 const io = socketIo(server, {
   cors: {

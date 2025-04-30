@@ -26,4 +26,10 @@ router.put('/profile', isAuthenticated, /* upload.single('profileImage'), */ use
 // Logout User
 router.post('/logout', userCtrl.logout);
 
+// Get User Details (Protected - likely the same as profile, but added as requested)
+router.get('/details', isAuthenticated, userCtrl.getUserDetails);
+
+// Get User by Email (Protected - expects email as query parameter ?email=...)
+router.get('/byEmail', isAuthenticated, userCtrl.getUserbyEmail);
+
 module.exports = router;
