@@ -13,7 +13,13 @@ dotenv.config();
 const dburl = process.env.MONGO_URI;
 const app = express();
 const server = http.createServer(app); // Create HTTP server for Socket.io
-const io = socketIo(server, { cors: { origin: "*" } });
+const io = socketIo(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    credentials: true
+  }
+});
+
 
 //! Connect to MongoDB
 mongoose
@@ -22,7 +28,10 @@ mongoose
   .catch((err) => console.error("Database connection error:", err));
 
 //! Middlewares
-app.use(cors()); // Enable CORS
+app.use(cors({
+  origin: 'http://localhost:5173', // your frontend's origin
+  credentials: true                // allow cookies and credentials
+}));
 app.use(express.json()); // Parse JSON request body
 
 //! Routes

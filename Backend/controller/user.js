@@ -200,7 +200,7 @@ const userCtrl = {
 
     //!Send the response
     console.log("User Registration Successful:", responseData);
-    res.status(201).json(responseData);
+    res.status(201).json({success:true, responseData});
   }),
 
   //!Login
@@ -320,6 +320,7 @@ const userCtrl = {
       userProfile.profileImageUrl = userImage ? userImage.imageUrl : null;
 
       res.status(200).json({
+        success: true,
         message: "Profile updated successfully",
         user: userProfile, // Send updated profile with image URL
       });

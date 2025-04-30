@@ -80,7 +80,8 @@ function Register() {
         `${backend_api}/api/users/register`, // Use backend_api here
         submissionData,
         {
-          headers: {},
+          headers: {'Content-Type': 'multipart/form-data'
+          },
           withCredentials: true,
         }
       );
@@ -91,6 +92,8 @@ function Register() {
 
     } catch (err) {
       console.error('Registration Error:', err);
+      console.error('Registration Error:', err.message);
+      console.error('Full Error:', err.toJSON?.() || err);
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
       setLoading(false);
     }
