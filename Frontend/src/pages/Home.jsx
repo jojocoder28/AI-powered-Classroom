@@ -21,7 +21,7 @@ const Home = () => {
           </h1>
           <Link
             to="/register" // Or link to dashboard/classroom if logged in
-            className="inline-block bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition duration-300 ease-in-out"
+            className="inline-block bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition duration-300 ease-in-out dark:bg-teal-600 dark:hover:bg-teal-700"
           >
             Start Learning
           </Link>
@@ -31,12 +31,12 @@ const Home = () => {
         <div className="md:w-1/2 flex justify-center relative">
            {/* Placeholder for the background shape */}
            <div className="absolute inset-0 flex justify-center items-center z-0">
-             <div className="w-80 h-80 md:w-96 md:h-96 bg-green-200 dark:bg-teal-900 opacity-50 rounded-full blur-3xl"></div>
+             <div className="w-80 h-80 md:w-96 md:h-96 bg-teal-200 dark:bg-teal-900 opacity-50 rounded-full blur-3xl"></div>
            </div>
            <div className="relative z-10 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-xl overflow-hidden w-full max-w-md"> 
-             {/* Replace with actual image or component */}
+             {/* Updated image path */}
              <img
-              src="online-class-env.jpg" // Replace with your image path
+              src="/online-class-env.jpg" // Updated image path
               alt="Online Classroom Environment"
               className="rounded-lg object-cover w-full h-64"
              />
