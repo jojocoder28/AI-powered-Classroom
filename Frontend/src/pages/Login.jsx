@@ -1,6 +1,5 @@
 import React, { useState, useContext } from 'react'; // Import useContext
 import { Link, useNavigate } from 'react-router-dom';
-import ThemeSwitch from '../components/ThemeSwitch';
 import { Context } from '../main'; // Import the Context from main.jsx
 import { backend_api } from '../config';
 
@@ -62,7 +61,6 @@ function Login() {
     <div className="min-h-screen bg-gradient-to-br from-yellow-200 to-amber-300 dark:bg-gradient-to-br dark:from-stone-800 dark:to-stone-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 rounded-xl shadow-lg p-8 bg-gray-100 dark:bg-gray-800 neomorphic">
         <div className="flex justify-end">
-          <ThemeSwitch />
         </div>
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-700 dark:text-gray-300">

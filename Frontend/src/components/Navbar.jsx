@@ -16,7 +16,7 @@ const Navbar = () => {
     // Otherwise, check system preference
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
-  const { user } = useContext(Context);; // Get user state and logout function
+  const { user } = useContext(Context);
   const navigate = useNavigate();
 
   useEffect(() => {

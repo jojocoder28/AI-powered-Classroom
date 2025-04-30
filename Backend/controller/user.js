@@ -231,7 +231,7 @@ const userCtrl = {
     });
 
     //! Generate and send the token using generateToken
-    console.log("Login successful, generating token...");
+    console.log("Login successful, generating token...",user);
     generateToken(user, token, "Login success", 200, res); // Pass user object directly
 
   }),
