@@ -353,3 +353,19 @@ const userCtrl = {
   }),
 };
 module.exports = userCtrl;
+
+export const getUserDetails = asyncHandler(async (req, res, next) => {
+  const user = req.user;
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+export const getUserbyEmail = asyncHandler(async (req, res, next) => {
+  const user = await User.findOne({email: req.query.email});
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
