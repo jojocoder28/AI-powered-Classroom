@@ -5,7 +5,7 @@ import axios from 'axios';
 import { backend_api } from '../config.js'; // Import backend_api instead of server
 
 function Register() {
-  const { setIsAuthenticated, setUser } = useContext(Context);
+  const { isAuthenticated, setIsAuthenticated, user, setUser } = useContext(Context);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({

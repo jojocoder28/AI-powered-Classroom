@@ -9,7 +9,7 @@ function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { setIsAuthenticated, setUser } = useContext(Context);
+  const { isAuthenticated, setIsAuthenticated, user, setUser } = useContext(Context);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
