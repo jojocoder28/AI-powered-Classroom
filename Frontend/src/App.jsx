@@ -1,6 +1,11 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
+import Navbar from './components/Navbar';
+// import NotFound from './components/NotFound';
+import CopyrightElement from './elements/CopyrightElement';
+import { ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
@@ -17,6 +22,7 @@ function App() {
       {/* You can add a Navbar or Header component here, outside the Routes,
           so it appears on all pages */}
       {/* <Navbar /> */}
+      <Navbar transparent/>
 
       <Routes>
         {/* Define your routes here */}
@@ -32,7 +38,9 @@ function App() {
         {/* Add a catch-all route for 404 Not Found pages */}
         {/* <Route path="*" element={<NotFound />} /> */}
       </Routes>
-
+      <CopyrightElement name="Vidyana" link="/"/>
+      <ToastContainer position='top-center' />
+      
       {/* You can add a Footer component here, outside the Routes */}
       {/* <Footer /> */}
     </BrowserRouter>
