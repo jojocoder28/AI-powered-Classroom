@@ -231,7 +231,7 @@ const userCtrl = {
     });
 
     //! Generate and send the token using generateToken
-    console.log("Login successful, generating token...");
+    console.log("Login successful, generating token...",user);
     generateToken(user, token, "Login success", 200, res); // Pass user object directly
 
   }),
@@ -379,5 +379,24 @@ const userCtrl = {
       message: 'Logged out successfully',
     });
   }),
+
+  getUserDetails:asyncHandler(async (req, res, next) => {
+    const user = req.user;
+    
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  }),
+  
+  getUserbyEmail: asyncHandler(async (req, res, next) => {
+    const user = await User.findOne({email: req.query.email});
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  }),
 };
 module.exports = userCtrl;
+
+

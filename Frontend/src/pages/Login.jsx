@@ -1,15 +1,15 @@
-import React, { useState, useContext } from 'react'; // Import useContext
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import ThemeSwitch from '../components/ThemeSwitch';
-import { Context } from '../main'; // Import the Context from main.jsx
+import { Context } from '../main';
 import { backend_api } from '../config';
+import axios from 'axios';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { setIsAuthenticated, setUser } = useContext(Context); // Use context
+  const { setIsAuthenticated, setUser } = useContext(Context);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -18,40 +18,34 @@ function Login() {
     setLoading(true);
 
     try {
-      // Assuming your user routes are mounted at /api/users in your backend app
-      const response = await fetch(`${backend_api}/api/users/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+      const response = await axios.post(`${backend_api}/api/users/login`, {
+        email,
+        password,
+      },
+      {
+        withCredentials: true,
+        headers: { "Content-Type": "application/json" },
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to login');
-      }
-
       // ---- Login Success ----
-      console.log('Login successful:', data);
+      console.log('Login successful:', response.data);
 
       // 1. Store the token (e.g., in localStorage)
-      localStorage.setItem('token', data.token);
+      localStorage.setItem('token', response.data.token);
 
       // 2. Update authentication state in context
       setIsAuthenticated(true);
 
       // 3. Update user data in context
-      setUser(data.user); // Assuming backend sends { token: '...', user: {...} }
-
+      setUser(response.data.user); 
+      console.log(response.data.user)
       navigate('/dashboard'); // Redirect to dashboard
 
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message || 'Failed to login');
       console.error('Login error:', err);
       setIsAuthenticated(false); // Ensure state is false on error
-      setUser({});
+      setUser([]);
       localStorage.removeItem('token'); // Clear token on error
     } finally {
       setLoading(false);
@@ -59,13 +53,12 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-200 to-amber-300 dark:bg-gradient-to-br dark:from-stone-800 dark:to-stone-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 rounded-xl shadow-lg p-8 bg-gray-100 dark:bg-gray-800 neomorphic">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-200 to-amber-300 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 rounded-xl shadow-lg p-8 bg-gray-100 neomorphic">
         <div className="flex justify-end">
-          <ThemeSwitch />
         </div>
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-700 dark:text-gray-300">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-700">
             Sign in
           </h2>
         </div>
@@ -85,7 +78,7 @@ function Login() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-amber-500 focus:border-amber-500 focus:z-10 sm:text-sm bg-gray-100 dark:bg-gray-800 neomorphic-inset"
+                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-amber-500 focus:border-amber-500 focus:z-10 sm:text-sm bg-gray-100 neomorphic-inset"
                 placeholder="Enter your email"
                 disabled={loading}
               />
@@ -102,7 +95,7 @@ function Login() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-amber-500 focus:border-amber-500 focus:z-10 sm:text-sm bg-gray-100 dark:bg-gray-800 neomorphic-inset"
+                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-amber-500 focus:border-amber-500 focus:z-10 sm:text-sm bg-gray-100 neomorphic-inset"
                 placeholder="Enter your password"
                 disabled={loading}
               />
@@ -116,15 +109,15 @@ function Login() {
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
-                className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 dark:border-gray-700 rounded bg-gray-100 dark:bg-gray-800 neomorphic-inset"
+                className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded bg-gray-100 neomorphic-inset"
                 disabled={loading}
               />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                 Remember me
               </label>
             </div>
              {/* <div className="text-sm">
-              <Link to="/forgot-password" className="font-medium text-amber-600 hover:text-amber-500 dark:text-amber-400 dark:hover:text-amber-300">
+              <Link to="/forgot-password" className="font-medium text-amber-600 hover:text-amber-500">
                 Forgot password?
               </Link>
             </div> */}
@@ -140,9 +133,9 @@ function Login() {
             </button>
           </div>
         </form>
-        <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+        <div className="mt-6 text-center text-sm text-gray-600">
           Don't have an account?{' '}
-          <Link to="/register" className="font-medium text-amber-600 hover:text-amber-500 dark:text-amber-400 dark:hover:text-amber-300">
+          <Link to="/register" className="font-medium text-amber-600 hover:text-amber-500">
             Register
           </Link>
         </div>
