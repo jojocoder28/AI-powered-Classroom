@@ -31,7 +31,7 @@ const AppWrapper = () => {
       if (token) {
         try {
           // Verify token with backend and fetch user details
-          const response = await axios.get(`${backend_api}/api/users/me`, { // Assuming you have a /me endpoint
+          const response = await axios.get(`${backend_api}/api/users/details`, { // Assuming you have a /me endpoint
             headers: {
               Authorization: `Bearer ${token}`
             },
