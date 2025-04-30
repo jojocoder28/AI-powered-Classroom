@@ -259,14 +259,13 @@ const userCtrl = {
 
   // ...(updateProfile remains the same for now, can add image update later)
   updateProfile: asyncHandler(async (req, res) => {
-    // TODO: Add image upload logic here similar to register if needed
     try {
       if (!req.user) {
         res.status(401);
         throw new Error("Not authorized, token failed or user ID not found in token");
       }
   
-      const userId = req.user; 
+      const userId = req.user;
       const {
         email, username, password,
         firstName, lastName, phoneNumber, university,
@@ -304,28 +303,57 @@ const userCtrl = {
       if (username) user.username = username;
       if (email) user.email = email;
   
+      // Handle Image Upload if a file is included
+      if (req.file) {
+        const existingImage = await UserImage.findOne({ user: userId });
+  
+        // Optional: Delete old image if present
+        if (existingImage?.publicId) {
+          try {
+            await cloudinary.uploader.destroy(existingImage.publicId);
+          } catch (err) {
+            console.warn("Failed to delete previous image:", err.message);
+          }
+        }
+  
+        // Upload new image
+        const cloudinaryResult = await uploadToCloudinary(req.file.buffer, 'user_profile_images', userId);
+  
+        // Update or create UserImage document
+        if (existingImage) {
+          existingImage.imageUrl = cloudinaryResult.secure_url;
+          existingImage.publicId = cloudinaryResult.public_id;
+          await existingImage.save();
+        } else {
+          await new UserImage({
+            user: userId,
+            imageUrl: cloudinaryResult.secure_url,
+            publicId: cloudinaryResult.public_id
+          }).save();
+        }
+      }
+  
       await user.save();
   
-      // Fetch updated user data along with image url
+      // Send updated user with image
       const updatedUser = await User.findById(userId).select("-password");
       const userImage = await UserImage.findOne({ user: userId });
       const userProfile = updatedUser.toObject();
-      userProfile.profileImageUrl = userImage ? userImage.imageUrl : null;
-
+      userProfile.profileImageUrl = userImage?.imageUrl || null;
+  
       res.status(200).json({
         message: "Profile updated successfully",
-        user: userProfile, // Send updated profile with image URL
+        user: userProfile,
       });
     } catch (error) {
       console.error("Update profile error:", error.message);
-      // Check for specific errors like duplicate key if username/email changed
-      if (error.code === 11000) { // MongoDB duplicate key error
-          res.status(409).json({ message: "Email or username already exists." });
+      if (error.code === 11000) {
+        res.status(409).json({ message: "Email or username already exists." });
       } else {
-          res.status(500).json({ message: error.message || "Server error during profile update" });
+        res.status(500).json({ message: error.message || "Server error during profile update" });
       }
     }
-  }),
+  }),  
 
   //!Logout
   logout: asyncHandler(async (req, res) => {

@@ -21,7 +21,7 @@ router.get('/profile', isAuthenticated, userCtrl.profile);
 
 // Update Profile (Protected)
 // If you want image update here too, add: upload.single('profileImage')
-router.put('/profile', isAuthenticated, /* upload.single('profileImage'), */ userCtrl.updateProfile);
+router.put('/profile', isAuthenticated, upload.single('profileImage'), userCtrl.updateProfile);
 
 // Logout User
 router.post('/logout', userCtrl.logout);
