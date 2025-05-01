@@ -129,8 +129,8 @@ const getClassroomDetails = asyncHandler(async (req, res, next) => {
 
     const classroom = await Classroom.findById(classroomId)
                                      .populate('teacher', 'firstName lastName email role')
-                                     .populate('students', 'firstName lastName email role')
-                                     .populate('assignments.uploader', 'firstName lastName');
+                                     .populate('students', 'firstName lastName email role');
+                                     
 
     if (!classroom) {
         return next(new ErrorHandler(`Classroom not found with id ${classroomId}`, 404));

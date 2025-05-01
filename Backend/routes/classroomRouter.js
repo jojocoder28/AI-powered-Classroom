@@ -78,6 +78,7 @@ router.get('/available', isAuthenticated, getAvailableClassrooms);
 // --- Common Routes (Authenticated Users) ---
 // Added a check for hyphen vs no hyphen, frontend uses my-classrooms
 router.get('/myclassrooms', isAuthenticated, getMyClassrooms);
+// router.get('/getdetails/:id', isAuthenticated, getClassroomDetails);
 
 // These routes require authentication, and the controller handles specific authorization (is user in class?)
 router.get('/:id', isAuthenticated, getClassroomDetails);

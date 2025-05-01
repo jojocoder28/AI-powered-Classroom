@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'; // Import useContext
-import { Link, useNavigate } from 'react-router-dom'; // Import Link and useNavigate
+import { useParams, Link, useNavigate } from 'react-router-dom'; // Import Link and useNavigate
 import axios from 'axios'; // Import axios
 import ParticipantsSection from '../components/ParticipantsSection';
 import { Context } from '../main'; // Import the context from main.jsx
@@ -285,6 +285,7 @@ const AssignmentsSection = ({ classroomId }) => {
 // --- Main Classroom Page Component ---
 
 function Classroom() {
+  const { roomId } = useParams();
   const { isAuthenticated, user, loading: authLoading } = useContext(Context); // Use context
   const navigate = useNavigate(); // For potential redirects
 
@@ -292,6 +293,7 @@ function Classroom() {
   const [selectedClassroom, setSelectedClassroom] = useState(null);
   const [isLoading, setIsLoading] = useState(false); // Component specific loading
   const [error, setError] = useState(null);
+  //const [classroomId, setClassroomId] = useState(null); // Track selected classroom ID
 
   // --- Fetch User's Classrooms (Requires Auth) ---
   useEffect(() => {
@@ -308,26 +310,16 @@ function Classroom() {
     const fetchClassrooms = async () => {
       setIsLoading(true);
       setError(null);
+      //console.log(req.params);
       console.log('Fetching user classrooms...');
       try {
         // --- Get token from cookie ---
-        const nameEQ = "token=";
-        const ca = document.cookie.split(';');
-        let token = null;
-        for(let i=0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-            if (c.indexOf(nameEQ) === 0) {
-                token = c.substring(nameEQ.length, c.length);
-                break;
-            }
-        }
-         if (!token) throw new Error("Authentication required.");
+         //if (!token) throw new Error("Authentication required.");
 
         // --- Actual API Call ---
         // Replace with your endpoint to get classrooms for the logged-in user
-        const response = await axios.get(`${backend_api}/api/v1/classroom/my-classrooms`, { // Example endpoint
-            headers: { Authorization: `Bearer ${token}` },
+        const response = await axios.get(`${backend_api}/api/classrooms/${roomId}`, { // Example endpoint
+            //headers: { Authorization: `Bearer ${token}` },
             withCredentials: true,
         });
 
