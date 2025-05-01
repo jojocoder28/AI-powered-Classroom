@@ -7,6 +7,7 @@ const socketIo = require("socket.io");
 const router = require("./routes/users");
 const conferenceRouter = require("./routes/conferenceRouter");
 const { initializeSocket } = require("./controller/conferenceController");
+const classroomRouter = require('./routes/classroomRouter');
 const errorHandler = require("./middlewares/errorHandler");
 const cookieParser = require('cookie-parser');
 
@@ -40,6 +41,7 @@ app.use(express.json()); // Parse JSON request body
 //! Routes
 app.use("/api/users", router);
 app.use("/api/conference", conferenceRouter);
+app.use('/api/classrooms', classroomRouter);
 
 //! Initialize Socket.io
 initializeSocket(io);
