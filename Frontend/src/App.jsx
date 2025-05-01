@@ -28,6 +28,8 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function AppContent() {
+  const { isAuthenticated } = useContext(Context);
+
   return (
     <div className="flex flex-col min-h-screen bg-mint-cream dark:bg-gray-900">
       <Navbar />
@@ -35,7 +37,11 @@ function AppContent() {
         <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading Page...</div>}>
           <Routes>
             {/* Public Routes */}
+            {isAuthenticated ? (
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            ) : (
             <Route path="/" element={<Home />} />
+            )}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             {/* Add other public routes like /features, /contact if needed */}

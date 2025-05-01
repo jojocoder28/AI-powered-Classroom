@@ -38,7 +38,7 @@ function Login() {
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to login');
       setIsAuthenticated(false);
-      setUser({});
+      setUser([]);
       document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     } finally {
       setLoading(false);
