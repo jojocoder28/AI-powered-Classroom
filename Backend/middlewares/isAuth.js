@@ -7,7 +7,7 @@ const {ErrorHandler} = require("../utils/errorHandler");
 const isAuthenticated = asyncHandler(
   async (req, res, next) => {
     console.log(req.cookies)
-    const token = req.cookies.studentToken || req.cookies.teacherToken;
+    const token = req.cookies.userToken;
     if (!token) {
       return next(new ErrorHandler("User is not authenticated!", 400));
     }

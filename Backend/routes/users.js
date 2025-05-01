@@ -21,9 +21,6 @@ router.post('/login', userCtrl.login);
 // Get Profile (Protected)
 router.get('/profile', isAuthenticated, userCtrl.profile);
 
-router.get('/profile/teacher', isTeacherAuthenticated, userCtrl.findUsersbyId);
-router.get('/profile/student', isStudentAuthenticated, userCtrl.findUsersbyId);
-
 // Update Profile (Protected)
 // If you want image update here too, add: upload.single('profileImage')
 router.put('/profile', isAuthenticated, upload.single('profileImage'), userCtrl.updateProfile);

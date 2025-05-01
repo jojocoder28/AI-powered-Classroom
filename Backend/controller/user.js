@@ -363,19 +363,13 @@ const userCtrl = {
       secure: true,
       sameSite: 'None',
     });
-    res.cookie('teacherToken', '', { // Corrected cookie name
+    res.cookie('userToken', '', { // Corrected cookie name
       httpOnly: true,
       expires: new Date(0),
       secure: true,
       sameSite: 'None',
     });
     res.cookie('token', '', { // Corrected cookie name
-      httpOnly: true,
-      expires: new Date(0),
-      secure: true,
-      sameSite: 'None',
-    });
-    res.cookie('studentToken', '', { // Corrected cookie name
       httpOnly: true,
       expires: new Date(0),
       secure: true,

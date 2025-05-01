@@ -3,10 +3,8 @@ const generateToken = (user, token, message, statusCode, res) => {
     let cookieName;
     if (user.role === 'Admin') {
       cookieName = 'adminToken';
-    } else if (user.role === 'Teacher') {
-      cookieName = 'teacherToken';
-    } else if (user.role === 'Student') {
-      cookieName = 'studentToken';
+    } else if (user.role === 'Teacher' || user.role === 'Student') {
+      cookieName = 'userToken';
     } else {
         // For any other role, throw an error or handle as a generic user if applicable
         // Assuming only these three roles are expected to receive tokens via this function:

@@ -6,14 +6,14 @@ const { User } = require("../model/User"); // Adjust path if needed
 const { ErrorHandler } = require("../utils/errorHandler"); // Adjust path if needed
 
 const isStudentAuthenticated = asyncHandler(async (req, res, next) => {
-    const { studentToken } = req.cookies; // Look specifically for studentToken
+    const { userToken } = req.cookies; // Look specifically for userToken
 
-    if (!studentToken) {
+    if (!userToken) {
         return next(new ErrorHandler("Student is not authenticated!", 401)); // Use 401 for unauthorized
     }
 
     try {
-        const decoded = jwt.verify(studentToken, process.env.JWT_SECRET_KEY);
+        const decoded = jwt.verify(userToken, process.env.JWT_SECRET_KEY);
         req.user = await User.findById(decoded.id);
 
         if (!req.user) {
