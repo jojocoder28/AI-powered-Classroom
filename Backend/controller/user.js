@@ -360,24 +360,38 @@ const userCtrl = {
     res.cookie('adminToken', '', {
       httpOnly: true,
       expires: new Date(0),
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
       sameSite: 'None',
     });
     res.cookie('teacherToken', '', { // Corrected cookie name
       httpOnly: true,
       expires: new Date(0),
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
+      sameSite: 'None',
+    });
+    res.cookie('token', '', { // Corrected cookie name
+      httpOnly: true,
+      expires: new Date(0),
+      secure: true,
       sameSite: 'None',
     });
     res.cookie('studentToken', '', { // Corrected cookie name
       httpOnly: true,
       expires: new Date(0),
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
       sameSite: 'None',
     });
     res.status(200).json({
       message: 'Logged out successfully',
     });
+  }),
+
+  findUsersbyId : asyncHandler(async (req,res,next)=>{
+    const user = await User.findById(req.params.id);
+    res.status(200).json({
+      success: true,
+      user,
+    })
   }),
 
   getUserDetails:asyncHandler(async (req, res, next) => {

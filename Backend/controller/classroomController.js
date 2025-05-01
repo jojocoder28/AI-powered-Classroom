@@ -85,7 +85,7 @@ const joinClassroom = asyncHandler(async (req, res, next) => {
 // @access  Private (Authenticated Users via router middleware)
 const getMyClassrooms = asyncHandler(async (req, res, next) => {
     const userId = req.user._id;
-
+    console.log(req.user);
     const classrooms = await Classroom.find({
         $or: [{ teacher: userId }, { students: userId }]
     })

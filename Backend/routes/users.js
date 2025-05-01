@@ -2,6 +2,8 @@ const express = require("express");
 const multer = require("multer");
 const userCtrl = require("../controller/user");
 const isAuthenticated = require("../middlewares/isAuth");
+const isTeacherAuthenticated = require("../middlewares/isTeacherAuthenticated");
+const isStudentAuthenticated = require("../middlewares/isStudentAuthenticated");
 
 // Configure Multer for memory storage (to get buffer for Cloudinary)
 const storage = multer.memoryStorage();
@@ -18,6 +20,9 @@ router.post('/login', userCtrl.login);
 
 // Get Profile (Protected)
 router.get('/profile', isAuthenticated, userCtrl.profile);
+
+router.get('/profile/teacher', isTeacherAuthenticated, userCtrl.findUsersbyId);
+router.get('/profile/student', isStudentAuthenticated, userCtrl.findUsersbyId);
 
 // Update Profile (Protected)
 // If you want image update here too, add: upload.single('profileImage')
