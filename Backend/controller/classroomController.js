@@ -5,7 +5,7 @@ const { User } = require("../model/User"); // Assuming User model is in model/Us
 const { ErrorHandler } = require("../utils/errorHandler");
 
 // @desc    Create a new classroom
-// @route   POST /api/v1/classrooms
+// @route   POST /api/classrooms
 // @access  Private (Teachers Only)
 const createClassroom = asyncHandler(async (req, res, next) => {
     const { name, description } = req.body;
@@ -19,10 +19,8 @@ const createClassroom = asyncHandler(async (req, res, next) => {
         name,
         description,
         teacher: teacherId,
+        // joinCode is generated automatically by the model pre-save hook
     });
-
-    // Optional: Add classroom to teacher's teaching list (if you add that field to User model)
-    // await User.findByIdAndUpdate(teacherId, { $push: { teachingClassrooms: newClassroom._id } });
 
     res.status(201).json({
         success: true,
@@ -32,8 +30,8 @@ const createClassroom = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    Join a classroom using a join code
-// @route   POST /api/v1/classrooms/join
-// @access  Private (Students Only for now, could be generic)
+// @route   POST /api/classrooms/join
+// @access  Private (Students Only)
 const joinClassroom = asyncHandler(async (req, res, next) => {
     const { joinCode } = req.body;
     const studentId = req.user._id; // ID from isStudentAuthenticated middleware
@@ -62,9 +60,6 @@ const joinClassroom = asyncHandler(async (req, res, next) => {
     classroom.students.push(studentId);
     await classroom.save();
 
-    // Optional: Add classroom to student's enrolled list (if you add that field to User model)
-    // await User.findByIdAndUpdate(studentId, { $push: { enrolledClassrooms: classroom._id } });
-
     res.status(200).json({
         success: true,
         message: "Successfully joined the classroom",
@@ -72,26 +67,21 @@ const joinClassroom = asyncHandler(async (req, res, next) => {
     });
 });
 
-// @desc    Get classrooms for the logged-in user (both taught and enrolled)
-// @route   GET /api/v1/classrooms/myclassrooms
+// @desc    Get classrooms for the logged-in user (taught OR enrolled)
+// @route   GET /api/classrooms/myclassrooms
 // @access  Private (Students and Teachers)
 const getMyClassrooms = asyncHandler(async (req, res, next) => {
     const userId = req.user._id;
-    const userRole = req.user.role;
 
-    let query;
-    if (userRole === 'Teacher') {
-        // Find classrooms where the user is the teacher
-        query = Classroom.find({ teacher: userId });
-    } else if (userRole === 'Student') {
-        // Find classrooms where the user is in the students array
-        query = Classroom.find({ students: userId });
-    } else {
-        // Should not happen if isAuth middleware works correctly
-        return next(new ErrorHandler("Invalid user role", 403));
-    }
-
-    const classrooms = await query.populate('teacher', 'name email').exec(); // Populate teacher name/email
+    // Find classrooms where the user is the teacher OR is in the students array
+    const classrooms = await Classroom.find({
+        $or: [
+            { teacher: userId },
+            { students: userId }
+        ]
+    })
+    .populate('teacher', 'name email') // Populate teacher info
+    .sort({ createdAt: -1 }); // Optional: Sort by creation date
 
     res.status(200).json({
         success: true,
@@ -100,9 +90,31 @@ const getMyClassrooms = asyncHandler(async (req, res, next) => {
     });
 });
 
+// @desc    Get ALL available classrooms for a student to potentially join
+// @route   GET /api/classrooms/available
+// @access  Private (Students Only)
+const getAvailableClassrooms = asyncHandler(async (req, res, next) => {
+    const studentId = req.user._id;
+
+    // Find classrooms where the student is NOT the teacher and NOT already enrolled
+    const availableClassrooms = await Classroom.find({
+        teacher: { $ne: studentId },      // Not taught by the student
+        students: { $ne: studentId }     // Not already enrolled by the student
+    })
+    .populate('teacher', 'name email') // Populate teacher info
+    .select('name description teacher joinCode createdAt') // Select fields needed for display + joinCode
+    .sort({ createdAt: -1 });
+
+    res.status(200).json({
+        success: true,
+        count: availableClassrooms.length,
+        data: availableClassrooms,
+    });
+});
+
 
 // @desc    Get details of a specific classroom
-// @route   GET /api/v1/classrooms/:id
+// @route   GET /api/classrooms/:id
 // @access  Private (User must be teacher or enrolled student)
 const getClassroomDetails = asyncHandler(async (req, res, next) => {
     const classroomId = req.params.id;
@@ -132,7 +144,7 @@ const getClassroomDetails = asyncHandler(async (req, res, next) => {
 
 
 // @desc    Get participants of a specific classroom
-// @route   GET /api/v1/classrooms/:id/participants
+// @route   GET /api/classrooms/:id/participants
 // @access  Private (User must be teacher or enrolled student)
 const getClassroomParticipants = asyncHandler(async (req, res, next) => {
     const classroomId = req.params.id;
@@ -171,6 +183,7 @@ module.exports = {
     createClassroom,
     joinClassroom,
     getMyClassrooms,
+    getAvailableClassrooms, // Export the new function
     getClassroomDetails,
     getClassroomParticipants,
 };
