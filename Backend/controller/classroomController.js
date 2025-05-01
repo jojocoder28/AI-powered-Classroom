@@ -50,15 +50,28 @@ const joinClassroom = asyncHandler(async (req, res, next) => {
     }
 
     if (classroom.teacher.equals(studentId)) {
-         return next(new ErrorHandler("Teachers cannot join their own classroom as a student", 400));
+        return next(new ErrorHandler("Teachers cannot join their own classroom as a student", 400));
     }
 
     if (classroom.students.includes(studentId)) {
+        res.cookie('classroomSession', classroom._id.toString(), {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None',
+            maxAge: 30 * 24 * 60 * 60 * 1000,
+        });
         return res.status(200).json({ success: true, message: "Already enrolled in this classroom", classroom });
     }
 
     classroom.students.push(studentId);
     await classroom.save();
+
+    res.cookie('classroomSession', classroom._id.toString(), {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
 
     res.status(200).json({
         success: true,
@@ -90,11 +103,20 @@ const getMyClassrooms = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/classroom/available
 // @access  Private (Students Only via router middleware)
 const getAvailableClassrooms = asyncHandler(async (req, res, next) => {
+    const studentId = req.user._id;
+
+    const classrooms = await Classroom.find({
+        teacher: { $ne: studentId },
+        students: { $nin: [studentId] }
+    })
+    .populate('teacher', 'firstName lastName')
+    .select('name description teacher joinCode')
+    .sort({ createdAt: -1 });
+
     res.status(200).json({
         success: true,
-        message: "Browsing all classrooms not implemented.",
-        count: 0,
-        classrooms: [],
+        count: classrooms.length,
+        classrooms,
     });
 });
 
@@ -107,13 +129,13 @@ const getClassroomDetails = asyncHandler(async (req, res, next) => {
 
     const classroom = await Classroom.findById(classroomId)
                                      .populate('teacher', 'firstName lastName email role')
-                                     .populate('students', 'firstName lastName email role');
+                                     .populate('students', 'firstName lastName email role')
+                                     .populate('assignments.uploader', 'firstName lastName');
 
     if (!classroom) {
         return next(new ErrorHandler(`Classroom not found with id ${classroomId}`, 404));
     }
 
-    // Authorization: User must be the teacher or an enrolled student
     const isTeacher = classroom.teacher._id.equals(userId);
     const isStudent = classroom.students.some(student => student._id.equals(userId));
 
@@ -143,15 +165,14 @@ const getClassroomParticipants = asyncHandler(async (req, res, next) => {
         return next(new ErrorHandler(`Classroom not found with id ${classroomId}`, 404));
     }
 
-    // Authorization: User must be the teacher or an enrolled student
     const isTeacher = classroom.teacher._id.equals(userId);
-    const isStudent = classroom.students.some(student => student._id.equals(userId));
+    const isStudent = classroom.students && classroom.students.some(student => student._id.equals(userId));
 
     if (!isTeacher && !isStudent) {
         return next(new ErrorHandler("You are not authorized to view participants of this classroom", 403));
     }
 
-    const participants = [classroom.teacher, ...classroom.students].filter(p => p);
+    const participants = [classroom.teacher, ...(classroom.students || [])].filter(p => p);
 
     res.status(200).json({
         success: true,
@@ -169,37 +190,23 @@ const getAssignments = asyncHandler(async (req, res, next) => {
     const classroomId = req.params.id;
     const userId = req.user._id;
 
-    // 1. Find the classroom to verify existence and user membership
-    const classroom = await Classroom.findById(classroomId).select('_id teacher students');
+    const classroom = await Classroom.findById(classroomId)
+                                     .select('_id teacher students assignments')
+                                     .populate('assignments.uploader', 'firstName lastName');
+
     if (!classroom) {
         return next(new ErrorHandler(`Classroom not found with id ${classroomId}`, 404));
     }
 
-    // 2. Authorization: User must be the teacher or an enrolled student
     const isTeacher = classroom.teacher.equals(userId);
     const isStudent = classroom.students.includes(userId);
     if (!isTeacher && !isStudent) {
         return next(new ErrorHandler("You are not authorized to view assignments for this classroom", 403));
     }
 
-    // 3. TODO: Fetch actual assignments from the database
-    //    - You'll need an Assignment model (Schema)
-    //    - The Assignment model should have a reference to the Classroom (e.g., classroom: { type: mongoose.Schema.Types.ObjectId, ref: 'Classroom' })
-    //    - Example query: const assignments = await Assignment.find({ classroom: classroomId }).populate('uploadedBy', 'firstName lastName');
-
-    console.log(`Placeholder: Fetching assignments for classroom ${classroomId} by user ${userId}`);
-
-    // --- Placeholder Data (Replace with actual DB query results) ---
-    const mockAssignments = [
-        { _id: 'assign1', classroom: classroomId, title: 'Project Proposal', fileName: 'proposal_template.pdf', fileUrl: '#', uploadedBy: 'teacher_id_placeholder', createdAt: new Date(Date.now() - 86400000) },
-        { _id: 'assign2', classroom: classroomId, title: 'Milestone 1', fileName: 'milestone1_report.docx', fileUrl: '#', uploadedBy: 'teacher_id_placeholder', createdAt: new Date() },
-    ];
-    // --- End Placeholder ---
-
     res.status(200).json({
         success: true,
-        // message: "Assignments fetched successfully", // Optional message
-        assignments: mockAssignments, // Use actual query results here
+        assignments: classroom.assignments || [],
     });
 });
 
@@ -208,32 +215,29 @@ const getAssignments = asyncHandler(async (req, res, next) => {
 // @access  Private (Teachers Only via router middleware)
 const uploadAssignment = asyncHandler(async (req, res, next) => {
     const classroomId = req.params.id;
-    const teacherId = req.user._id; // User ID from isTeacherAuthenticated
-    const title = req.body.title; // Optional title from form data
+    const teacherId = req.user._id;
+    const title = req.body.title;
+    const description = req.body.description;
 
-    // 1. Verify Classroom and Teacher Authorization
-    const classroom = await Classroom.findById(classroomId).select('_id teacher');
+    const classroom = await Classroom.findById(classroomId).select('_id teacher students');
     if (!classroom) {
         return next(new ErrorHandler(`Classroom not found with id ${classroomId}`, 404));
     }
-    // Ensure the user making the request is the teacher of *this* classroom
     if (!classroom.teacher.equals(teacherId)) {
         return next(new ErrorHandler("You are not authorized to upload assignments to this classroom", 403));
     }
 
-    // 2. Check if file exists in request (uploaded by multer to memory)
     if (!req.file) {
         return next(new ErrorHandler("No file uploaded. Please select a file.", 400));
     }
 
-    // 3. Upload file buffer to Cloudinary
     let uploadResult;
     try {
         uploadResult = await new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
                 {
-                    folder: `classroom_assignments/${classroomId}`, // Organize uploads by classroom
-                    resource_type: "auto" // Automatically detect resource type (image, pdf, docx etc.)
+                    folder: `classroom_assignments/${classroomId}`,
+                    resource_type: "auto",
                 },
                 (error, result) => {
                     if (error) {
@@ -243,54 +247,51 @@ const uploadAssignment = asyncHandler(async (req, res, next) => {
                     resolve(result);
                 }
             );
-            // Pipe the buffer from multer (req.file.buffer) into the Cloudinary stream
             streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
         });
-
-        console.log('Cloudinary Upload Result:', uploadResult);
-
     } catch (error) {
-        return next(error); // Pass error to global error handler
+        return next(error);
     }
 
-    // 4. TODO: Save assignment metadata to your database
-    //    - Create an Assignment model (Schema) if you haven't already.
-    //    - It should include fields like: classroom (ref), uploadedBy (ref), title, fileName, fileUrl (from uploadResult.secure_url), publicId (from uploadResult.public_id), fileType (from uploadResult.resource_type), fileSize (from uploadResult.bytes), etc.
-    //    - Example: const newAssignment = await Assignment.create({ classroom: classroomId, uploadedBy: teacherId, title: title || req.file.originalname, fileName: req.file.originalname, fileUrl: uploadResult.secure_url, publicId: uploadResult.public_id, ... });
-
-    // --- Placeholder Response (Replace with actual saved assignment data) ---
-    const savedAssignmentPlaceholder = {
-        _id: `db_${Date.now()}`, // Replace with actual DB ID
-        classroom: classroomId,
-        uploadedBy: teacherId,
+    const newAssignment = {
+        uploader: teacherId,
         title: title || req.file.originalname,
-        fileName: req.file.originalname,
-        fileUrl: uploadResult.secure_url, // The crucial URL from Cloudinary
-        publicId: uploadResult.public_id, // Needed if you want to delete from Cloudinary later
-        fileType: uploadResult.resource_type,
-        fileSize: uploadResult.bytes,
-        createdAt: new Date(),
+        description: description || null,
+        originalFileName: req.file.originalname,
+        storagePath: uploadResult.secure_url,
+        cloudinaryPublicId: uploadResult.public_id,
+        fileType: uploadResult.format || req.file.mimetype,
     };
-    // --- End Placeholder ---
 
-    res.status(201).json({
-        success: true,
-        message: "Assignment uploaded successfully!",
-        assignment: savedAssignmentPlaceholder, // Return the saved assignment details
-    });
+    try {
+        classroom.assignments.push(newAssignment);
+        await classroom.save();
+        const savedAssignment = classroom.assignments[classroom.assignments.length - 1];
+
+        res.status(201).json({
+            success: true,
+            message: "Assignment uploaded successfully!",
+            assignment: savedAssignment,
+        });
+
+    } catch(dbError) {
+        console.error("Error saving assignment to DB:", dbError);
+        try {
+            await cloudinary.uploader.destroy(uploadResult.public_id);
+        } catch (deleteError) {
+            console.error("Failed to delete Cloudinary file after DB error:", deleteError);
+        }
+        return next(new ErrorHandler("Failed to save assignment details after upload.", 500));
+    }
 });
 
-
 module.exports = {
-    // Classroom Management
     createClassroom,
     joinClassroom,
     getMyClassrooms,
     getAvailableClassrooms,
     getClassroomDetails,
     getClassroomParticipants,
-    // Assignments
     getAssignments,
     uploadAssignment,
-    // TODO: Export controllers for deleteAssignment, submitAssignment etc.
 };
