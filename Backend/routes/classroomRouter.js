@@ -1,38 +1,87 @@
 'use strict';
 const express = require('express');
+const multer = require('multer');
+const path = require('path');
 const {
     createClassroom,
     joinClassroom,
     getMyClassrooms,
-    getAvailableClassrooms, // Import the new controller function
+    getAvailableClassrooms,
     getClassroomDetails,
     getClassroomParticipants,
-} = require('../controller/classroomController'); // Adjust path if controller is elsewhere
+    getAssignments,
+    uploadAssignment,
+    // TODO: Add controller for deleteAssignment if needed
+    // TODO: Add controller for submitAssignment (student)
+} = require('../controller/classroomController');
 
 // Import authentication middleware
-const isAuthenticated = require("../middlewares/isAuth"); // General authentication check
+const isAuthenticated = require("../middlewares/isAuth");
 const isStudentAuthenticated = require('../middlewares/isStudentAuthenticated');
 const isTeacherAuthenticated = require('../middlewares/isTeacherAuthenticated');
 
 const router = express.Router();
 
+// --- Multer Setup for File Uploads (In-Memory Storage for Cloudinary) ---
+const storage = multer.memoryStorage(); // Use memory storage
+
+// Optional: File filter (example: allow common document/image types)
+const fileFilter = (req, file, cb) => {
+    const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+        'text/plain',
+        'image/jpeg',
+        'image/png',
+        'image/gif'
+    ];
+    if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Invalid file type. Only common document/image formats allowed.'), false);
+    }
+};
+
+const upload = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: { fileSize: 1024 * 1024 * 10 } // Example: Limit file size to 10MB
+});
+
 // --- Teacher Routes ---
-// Route to create a classroom - Only teachers
 router.post('/', isTeacherAuthenticated, createClassroom);
 
+// Teacher uploads an assignment file
+// Uses isTeacherAuthenticated middleware
+// Uses multer memory storage: upload.single('assignmentFile')
+router.post(
+    '/:id/assignments',
+    isTeacherAuthenticated, // Ensure only teachers can access this route
+    upload.single('assignmentFile'), // MUST match FormData key in frontend
+    uploadAssignment
+);
+
+// TODO: Add route for Teacher to delete an assignment (e.g., DELETE /:id/assignments/:assignmentId)
+
 // --- Student Routes ---
-// Route to join a classroom - Only students
 router.post('/join', isStudentAuthenticated, joinClassroom);
-// Route to get classrooms available for joining - Only students
 router.get('/available', isStudentAuthenticated, getAvailableClassrooms);
 
+// TODO: Add route for Student to submit an assignment (e.g., POST /:id/assignments/:assignmentId/submit)
+// This would likely use isStudentAuthenticated and potentially different controller logic
+
 // --- Common Routes (Authenticated Users) ---
-// Route to get the user's classrooms (taught or enrolled)
+// Added a check for hyphen vs no hyphen, frontend uses my-classrooms
 router.get('/myclassrooms', isAuthenticated, getMyClassrooms);
 
-// Routes for specific classroom ID - require user to be authenticated first
-// Authorization (is user part of class?) is handled within the controller
+// These routes require authentication, and the controller handles specific authorization (is user in class?)
 router.get('/:id', isAuthenticated, getClassroomDetails);
 router.get('/:id/participants', isAuthenticated, getClassroomParticipants);
+router.get('/:id/assignments', isAuthenticated, getAssignments);
 
 module.exports = router;
