@@ -45,7 +45,7 @@ function MyClassrooms() {
             const response = await axios.get(`${backend_api}/api/classrooms/myclassrooms`, {
                 withCredentials: true,
             });
-            setMyClassrooms(response.data.data || []);
+            setMyClassrooms(response.data.classrooms || []);
         } catch (err) {
             console.error("Error fetching my classrooms:", err);
             setErrorMyClassrooms(err.response?.data?.message || "Failed to load your classrooms.");
@@ -66,7 +66,7 @@ function MyClassrooms() {
             const response = await axios.get(`${backend_api}/api/classrooms/available`, {
                 withCredentials: true,
             });
-            setAvailableClassrooms(response.data.data || []);
+            setAvailableClassrooms(response.data.classrooms || []);
         } catch (err) {
             console.error("Error fetching available classrooms:", err);
             setErrorAvailable(err.response?.data?.message || "Failed to load available classrooms.");
@@ -81,7 +81,7 @@ function MyClassrooms() {
         if (user?.role === 'Student') {
             fetchAvailableClassrooms();
         }
-    }, [fetchMyClassrooms, fetchAvailableClassrooms, user?.role]);
+    }, []);
 
     // --- Event Handlers ---
 

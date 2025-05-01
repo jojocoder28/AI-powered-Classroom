@@ -69,8 +69,8 @@ router.post(
 // TODO: Add route for Teacher to delete an assignment (e.g., DELETE /:id/assignments/:assignmentId)
 
 // --- Student Routes ---
-router.post('/join', isStudentAuthenticated, joinClassroom);
-router.get('/available', isStudentAuthenticated, getAvailableClassrooms);
+router.post('/join', isAuthenticated, joinClassroom);
+router.get('/available', isAuthenticated, getAvailableClassrooms);
 
 // TODO: Add route for Student to submit an assignment (e.g., POST /:id/assignments/:assignmentId/submit)
 // This would likely use isStudentAuthenticated and potentially different controller logic
