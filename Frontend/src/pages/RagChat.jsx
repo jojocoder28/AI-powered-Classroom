@@ -140,7 +140,7 @@ const RagChat = () => {
     setLoading(true);
     setError('');
 
-    const mlBackendUrl = 'http://localhost:5001
+    const mlBackendUrl = 'http://localhost:5001'
 
     try {
       const response = await axios.post(`${mlBackendUrl}/ask`, {
