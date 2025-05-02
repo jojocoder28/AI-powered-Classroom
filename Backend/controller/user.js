@@ -4,6 +4,7 @@ const asyncHandler = require("express-async-handler");
 const streamifier = require('streamifier'); // To convert buffer to stream
 const cloudinary = require("../cloudinary"); // Import Cloudinary config
 const UserImage = require("../model/UserImage"); // Import the new UserImage model
+const generateToken = require("../utils/generateToken.js"); // Import generateToken utility
 
 // Import the destructured models from User.js
 const { User, Student, Teacher, Admin } = require("../model/User");
@@ -130,7 +131,7 @@ const userCtrl = {
           throw new Error("Invalid role specified");
       }
 
-      // --- Image Upload Logic --- 
+      // --- Image Upload Logic ---
       if (req.file) {
           console.log("Uploading image to Cloudinary...");
           try {
@@ -147,12 +148,12 @@ const userCtrl = {
               throw new Error("Failed to upload profile image.");
           }
       }
-      
+
       // Save the user document
       await userCreated.save();
       console.log("User document saved:", userCreated._id);
 
-      // --- Save Image Reference AFTER User Saved --- 
+      // --- Save Image Reference AFTER User Saved ---
       if (userCreated && cloudinaryResult) {
           console.log(`Saving image reference for user ${userCreated._id}`);
           const newUserImage = new UserImage({
@@ -178,7 +179,7 @@ const userCtrl = {
                 // Log this error, but don't overwrite the original error response
             }
         }
-        
+
         // Handle Mongoose validation errors or other specific errors
         if (error.name === 'ValidationError') {
             res.status(400);
@@ -190,17 +191,15 @@ const userCtrl = {
         throw new Error(error.message || "Registration failed due to an unexpected error.");
     }
 
-    //! Construct response
-    const responseData = userCreated.toObject();
-    delete responseData.password;
-    delete responseData.__v;
-    if (cloudinaryResult) {
-      responseData.profileImageUrl = cloudinaryResult.secure_url; // Add image URL to response
-    }
+    // Generate the token after user is successfully created and saved
+    const token = jwt.sign({ id: userCreated._id, role: userCreated.role }, process.env.JWT_SECRET, {
+      expiresIn: "30d",
+    });
 
-    //!Send the response
-    console.log("User Registration Successful:", responseData);
-    res.status(201).json(responseData);
+    //!Send the response using generateToken
+    console.log("User Registration Successful, generating token...");
+    generateToken(userCreated, token, "Registration Successful", 201, res);
+
   }),
 
   //!Login
@@ -211,7 +210,7 @@ const userCtrl = {
     validateFields({ email, password });
 
     //!Check if user email exists
-    const user = await User.findOne({ email }); 
+    const user = await User.findOne({ email });
     console.log("Login attempt for user:", user?.email);
     if (!user) {
         res.status(401); throw new Error("Invalid credentials");
@@ -223,34 +222,28 @@ const userCtrl = {
         res.status(401); throw new Error("Invalid credentials");
     }
 
-    // Fetch profile image URL if it exists
-    const userImage = await UserImage.findOne({ user: user._id });
+    // Fetch profile image URL if it exists (optional, can fetch on profile view)
+    // const userImage = await UserImage.findOne({ user: user._id });
 
-    //! Generate the token
+    // Generate the token after successful login
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: "30d", 
+      expiresIn: "30d",
     });
 
-    //!Send the response
-    res.json({
-      message: "Login success",
-      token,
-      id: user._id,
-      email: user.email,
-      username: user.username,
-      role: user.role,
-      profileImageUrl: userImage ? userImage.imageUrl : null // Include image URL in login response
-    });
+    //! Generate and send the token using generateToken
+    console.log("Login successful, generating token...",user);
+    generateToken(user, token, "Login success", 200, res); // Pass user object directly
+
   }),
 
-  //!Profile
+  //!Profile (Get logged-in user's profile)
   profile: asyncHandler(async (req, res) => {
     if (!req.user) {
         res.status(401); throw new Error("Not authorized, token failed or user ID not found in token");
     }
-    
+
     // Find user and populate profile image
-    const user = await User.findById(req.user).select("-password"); 
+    const user = await User.findById(req.user).select("-password");
     const userImage = await UserImage.findOne({ user: req.user });
 
     if (!user) {
@@ -261,78 +254,171 @@ const userCtrl = {
     const userProfile = user.toObject(); // Convert to plain object to add properties
     userProfile.profileImageUrl = userImage ? userImage.imageUrl : null;
 
-    res.json({ user: userProfile }); 
+    res.json({ user: userProfile });
   }),
 
-  // ...(updateProfile remains the same for now, can add image update later)
+  // Update Profile (Updates the logged-in user's profile)
   updateProfile: asyncHandler(async (req, res) => {
-    // TODO: Add image upload logic here similar to register if needed
     try {
       if (!req.user) {
         res.status(401);
         throw new Error("Not authorized, token failed or user ID not found in token");
       }
-  
-      const userId = req.user; 
+
+      const userId = req.user;
       const {
         email, username, password,
         firstName, lastName, phoneNumber, university,
         department, designation, fullName,
       } = req.body;
-  
+
       const user = await User.findById(userId);
       if (!user) {
         res.status(404);
         throw new Error("User not found");
       }
-  
+
       if (password && password.trim() !== "") {
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(password, salt);
       }
-  
+
       if (user.role === "Student" || user.role === "Teacher") {
         if (firstName) user.firstName = firstName;
         if (lastName) user.lastName = lastName;
         if (phoneNumber) user.phoneNumber = phoneNumber;
         if (university) user.university = university;
       }
-  
+
       if (user.role === "Teacher") {
         if (department) user.department = department;
         if (designation) user.designation = designation;
       }
-  
+
       if (user.role === "Admin") {
         if (fullName) user.fullName = fullName;
         if (phoneNumber) user.phoneNumber = phoneNumber;
       }
-  
+
       if (username) user.username = username;
       if (email) user.email = email;
-  
+
+      // Handle Image Upload if a file is included
+      if (req.file) {
+        const existingImage = await UserImage.findOne({ user: userId });
+
+        // Optional: Delete old image if present
+        if (existingImage?.publicId) {
+          try {
+            await cloudinary.uploader.destroy(existingImage.publicId);
+          } catch (err) {
+            console.warn("Failed to delete previous image:", err.message);
+          }
+        }
+
+        // Upload new image
+        const cloudinaryResult = await uploadToCloudinary(req.file.buffer, 'user_profile_images', userId);
+
+        // Update or create UserImage document
+        if (existingImage) {
+          existingImage.imageUrl = cloudinaryResult.secure_url;
+          existingImage.publicId = cloudinaryResult.public_id;
+          await existingImage.save();
+        } else {
+          await new UserImage({
+            user: userId,
+            imageUrl: cloudinaryResult.secure_url,
+            publicId: cloudinaryResult.public_id
+          }).save();
+        }
+      }
+
       await user.save();
-  
-      // Fetch updated user data along with image url
+
+      // Send updated user with image
       const updatedUser = await User.findById(userId).select("-password");
       const userImage = await UserImage.findOne({ user: userId });
       const userProfile = updatedUser.toObject();
-      userProfile.profileImageUrl = userImage ? userImage.imageUrl : null;
+      userProfile.profileImageUrl = userImage?.imageUrl || null;
 
       res.status(200).json({
         message: "Profile updated successfully",
-        user: userProfile, // Send updated profile with image URL
+        user: userProfile,
       });
     } catch (error) {
       console.error("Update profile error:", error.message);
-      // Check for specific errors like duplicate key if username/email changed
-      if (error.code === 11000) { // MongoDB duplicate key error
-          res.status(409).json({ message: "Email or username already exists." });
+      if (error.code === 11000) {
+        res.status(409).json({ message: "Email or username already exists." });
       } else {
-          res.status(500).json({ message: error.message || "Server error during profile update" });
+        res.status(500).json({ message: error.message || "Server error during profile update" });
       }
     }
   }),
 
+  //!Logout
+  logout: asyncHandler(async (req, res) => {
+    res.cookie('adminToken', '', {
+      httpOnly: true,
+      expires: new Date(0),
+      secure: true,
+      sameSite: 'None',
+    });
+    res.cookie('userToken', '', { // Corrected cookie name
+      httpOnly: true,
+      expires: new Date(0),
+      secure: true,
+      sameSite: 'None',
+    });
+    res.cookie('token', '', { // Corrected cookie name
+      httpOnly: true,
+      expires: new Date(0),
+      secure: true,
+      sameSite: 'None',
+    });
+    res.status(200).json({
+      message: 'Logged out successfully',
+    });
+  }),
+
+  //! Get User by ID (New/Modified function)
+  getUserById: asyncHandler(async (req, res) => {
+    const userId = req.params.userId; // Get ID from URL parameters
+
+    // Find user by ID and populate profile image, excluding password
+    const user = await User.findById(userId).select("-password");
+    const userImage = await UserImage.findOne({ user: userId });
+
+    if (!user) {
+        res.status(404); throw new Error("User not found");
+    }
+
+    // Combine user data with image URL
+    const userProfile = user.toObject(); // Convert to plain object
+    userProfile.profileImageUrl = userImage ? userImage.imageUrl : null;
+
+    res.status(200).json({
+      success: true,
+      user: userProfile,
+    });
+  }),
+
+  // This function seems redundant with /profile and the new /:userId route
+  // Consider removing or clarifying its purpose if it's different
+  getUserDetails:asyncHandler(async (req, res, next) => {
+    const user = req.user;
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  }),
+
+  getUserbyEmail: asyncHandler(async (req, res, next) => {
+    const user = await User.findOne({email: req.query.email});
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  }),
 };
 module.exports = userCtrl;

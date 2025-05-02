@@ -7,13 +7,23 @@ const socketIo = require("socket.io");
 const router = require("./routes/users");
 const conferenceRouter = require("./routes/conferenceRouter");
 const { initializeSocket } = require("./controller/conferenceController");
+const classroomRouter = require('./routes/classroomRouter');
 const errorHandler = require("./middlewares/errorHandler");
+const cookieParser = require('cookie-parser');
 
 dotenv.config();
 const dburl = process.env.MONGO_URI;
 const app = express();
+app.use(cookieParser());
+
 const server = http.createServer(app); // Create HTTP server for Socket.io
-const io = socketIo(server, { cors: { origin: "*" } });
+const io = socketIo(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    credentials: true
+  }
+});
+
 
 //! Connect to MongoDB
 mongoose
@@ -22,12 +32,16 @@ mongoose
   .catch((err) => console.error("Database connection error:", err));
 
 //! Middlewares
-app.use(cors()); // Enable CORS
+app.use(cors({
+  origin: 'http://localhost:5173', // your frontend's origin
+  credentials: true                // allow cookies and credentials
+}));
 app.use(express.json()); // Parse JSON request body
 
 //! Routes
 app.use("/api/users", router);
 app.use("/api/conference", conferenceRouter);
+app.use('/api/classrooms', classroomRouter);
 
 //! Initialize Socket.io
 initializeSocket(io);

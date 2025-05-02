@@ -5,10 +5,10 @@ const Schema = mongoose.Schema;
 const ChatMessageSchema = new Schema({
   user: {
     type: Schema.Types.ObjectId,
-    ref: 'User', // Reference to the User model (works with discriminators)
+    ref: 'User',
     required: true
   },
-  username: { // Store username for easier display, denormalization
+  username: {
     type: String,
     required: true
   },
@@ -21,7 +21,7 @@ const ChatMessageSchema = new Schema({
     type: Date,
     default: Date.now
   }
-}, { _id: true }); // Ensure each message gets an ID
+}, { _id: true });
 
 // --- Sub-Schema for File Submissions ---
 const SubmissionSchema = new Schema({
@@ -30,7 +30,7 @@ const SubmissionSchema = new Schema({
     ref: 'User',
     required: true
   },
-  username: { // Store username for easier identification
+  username: {
       type: String,
       required: true
   },
@@ -38,7 +38,15 @@ const SubmissionSchema = new Schema({
     type: String,
     required: true
   },
-  storagePath: { // Path or identifier for where the file is stored (e.g., S3 key, local path)
+  storagePath: { // Cloudinary secure URL for the file
+    type: String,
+    required: true
+  },
+  cloudinaryPublicId: { // Cloudinary public ID for management (e.g., deletion)
+    type: String,
+    required: true
+  },
+  fileType: { // Store the detected file type (e.g., pdf, docx, png)
     type: String,
     required: true
   },
@@ -53,22 +61,21 @@ const SubmissionSchema = new Schema({
 }, { _id: true });
 
 // --- Sub-Schema for Emotion Events ---
-// Storing individual events. Aggregation might be done in controllers or specific routes if needed.
 const EmotionEventSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    username: { // Store username for easier context
+    username: {
         type: String,
         required: true
     },
-    emotion: { // The detected emotion (e.g., 'happy', 'sad', 'neutral', 'surprised')
+    emotion: {
         type: String,
         required: true
     },
-    confidence: { // Optional: confidence score from the ML model
+    confidence: {
         type: Number
     },
     timestamp: {
@@ -86,39 +93,43 @@ const ConferenceRoomSchema = new Schema(
       required: true,
       trim: true
     },
-    host: { // The user who created/hosts the room (likely a Teacher or Admin)
+    host: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    participants: [ // List of users currently or allowed in the room
+    participants: [
       {
         type: Schema.Types.ObjectId,
         ref: "User",
       },
     ],
-    // --- New Fields ---
-    chatMessages: [ChatMessageSchema], // Embed chat messages
-    submissions: [SubmissionSchema],     // Embed submissions
-    emotionData: [EmotionEventSchema],    // Embed emotion detection events
-    // --- Timestamps ---
-    // createdAt is implicitly added by timestamps: true
-    // You might want specific start/end times for the room session itself
-    // startTime: { type: Date },
-    // endTime: { type: Date },
-    status: { // Status of the room (e.g., waiting, active, ended)
+    // --- Conference Image (Optional - if you want a separate image FOR the room itself) ---
+    // imageUrl: {
+    //     type: String,
+    //     default: null
+    // },
+    // imagePublicId: {
+    //     type: String,
+    //     default: null
+    // },
+    // --- Embedded Data ---
+    chatMessages: [ChatMessageSchema],
+    submissions: [SubmissionSchema], // Using updated SubmissionSchema
+    emotionData: [EmotionEventSchema],
+    status: {
       type: String,
       enum: ['Waiting', 'Active', 'Ended'],
       default: 'Waiting'
     }
   },
-  { timestamps: true } // Adds createdAt and updatedAt automatically
+  { timestamps: true }
 );
 
-// Indexing potentially queried fields
+// Indexing
 ConferenceRoomSchema.index({ host: 1 });
 ConferenceRoomSchema.index({ 'participants': 1 });
-ConferenceRoomSchema.index({ 'chatMessages.timestamp': -1 }); // For fetching recent messages
+ConferenceRoomSchema.index({ 'chatMessages.timestamp': -1 });
 ConferenceRoomSchema.index({ 'submissions.submittedAt': -1 });
 ConferenceRoomSchema.index({ 'emotionData.timestamp': -1 });
 ConferenceRoomSchema.index({ 'emotionData.user': 1 });

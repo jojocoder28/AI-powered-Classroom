@@ -1,30 +1,25 @@
-const jwt = require("jsonwebtoken");
 require('dotenv').config();
+const asyncHandler = require("express-async-handler");
+const jwt = require("jsonwebtoken");
+const {User} = require("../model/User");
+const {ErrorHandler} = require("../utils/errorHandler");  
 
-const isAuthenticated = async (req, res, next) => {
-  //! Get the token from the header
-  const headerObj = req.headers;
-  const token = headerObj.authorization ? headerObj.authorization.split(" ")[1] : null;
-  if (!token) {
-      return res.status(401).json({ message: "Authorization token is missing or invalid." });
-  }
-
-  //Verify token
-  const verifyToken = jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return false;
-    } else {
-      return decoded;
+const isAuthenticated = asyncHandler(
+  async (req, res, next) => {
+    // console.log(req.cookies)
+    const token = req.cookies.userToken;
+    if (!token) {
+      return next(new ErrorHandler("User is not authenticated!", 400));
     }
-  });
-  if (verifyToken) {
-    //save the user into req.obj
-    req.user = verifyToken.id;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    req.user = await User.findById(decoded.id);
+    if (req.user.role !== "Student" && req.user.role !== "Teacher") {
+      return next(
+        new ErrorHandler(`${req.user.role} not authorized for this resource!`, 403)
+      );
+    }
     next();
-  } else {
-    const err = new Error("Token expired please login again");
-    next(err);
   }
-};
+);
 
 module.exports = isAuthenticated;
