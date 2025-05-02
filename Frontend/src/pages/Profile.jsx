@@ -31,7 +31,7 @@ function Profile() {
       setImageFile(null); // Clear image file
       setFormData({}); // Clear form data
       setProfile(null); // Clear previous profile data
-
+      console.log(userId);
       try {
         let url;
         // If userId is in the URL, fetch that user's profile

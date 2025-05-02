@@ -62,6 +62,10 @@ function AppContent() {
               element={<ProtectedRoute><Profile /></ProtectedRoute>}
             />
             <Route
+              path="/profile/:userId"
+              element={<ProtectedRoute><Profile /></ProtectedRoute>}
+            />
+            <Route
               path="/settings"
               element={<ProtectedRoute><Settings /></ProtectedRoute>}
             />
