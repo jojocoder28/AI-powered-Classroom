@@ -6,7 +6,7 @@ import ChatSection from './ChatSection';
 
 const ClassroomDetailsPanel = ({
   selectedClassroom,
-}) => {
+}) => { 
   return (
     <div className="w-2/3 p-6 overflow-y-auto bg-gray-50 dark:bg-gray-900">
       {selectedClassroom ? (
