@@ -58,35 +58,52 @@ retriever = None
 rag_chain = None
 quiz_cache = {}
 
-@app.route('/upload', methods=['POST'])
-def upload_pdf():
+@app.route('/process_assignment_pdfs', methods=['POST'])
+def process_assignment_pdfs():
     global retriever, rag_chain, quiz_cache
 
-    if 'file' not in request.files:
-        return jsonify({"error": "No file uploaded"}), 400
+    data = request.get_json()
+    file_paths = data.get("file_paths", [])
 
-    file = request.files['file']
+    if not file_paths:
+        return jsonify({"error": "No file paths provided."}), 400
 
-    # Clear previous uploads
-    if os.path.exists("uploaded_docs"):
-        shutil.rmtree("uploaded_docs")
-    os.makedirs("uploaded_docs", exist_ok=True)
+    # Clear previous RAG data and quiz cache
+    # Note: If you want to maintain RAG across multiple calls, you might need a different approach
+    # For this implementation, each call processes a new set of PDFs.
+    retriever = None
+    rag_chain = None
     quiz_cache.clear()
 
-    file_path = f"uploaded_docs/{file.filename}"
-    file.save(file_path)
+    all_documents = []
+    for file_path in file_paths:
+        try:
+            loader = PyPDFLoader(file_path)
+            all_documents.extend(loader.load())
+        except Exception as e:
+            print(f"Error loading PDF {file_path}: {e}")
+            # Optionally, you might want to return an error or skip this file
+            continue # Skip to the next file if one fails to load
 
-    # PDF Processing
-    loader = PyPDFLoader(file_path)
-    documents = loader.load()
+    if not all_documents:
+        return jsonify({"error": "No documents could be loaded from the provided paths."}), 400
+
+    # PDF Processing (using combined documents)
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000)
-    docs = splitter.split_documents(documents)
+    docs = splitter.split_documents(all_documents)
 
-    vectorstore = Chroma.from_documents(
-        docs,
-        embedding=GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-    )
-    retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 10})
+    # Assuming you still want to use Chroma for vector storage
+    # Consider clearing previous Chroma data if necessary, depending on your needs
+    # For this implementation, we create a new vector store each time
+    try:
+        vectorstore = Chroma.from_documents(
+            docs,
+            embedding=GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+        )
+        retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 10})
+    except Exception as e:
+        print(f"Error creating vectorstore or retriever: {e}")
+        return jsonify({"error": "Failed to create RAG components."}), 500
 
     llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro", temperature=0)
 
@@ -94,7 +111,9 @@ def upload_pdf():
         "You are an assistant for question-answering tasks. "
         "Use the following pieces of retrieved context to answer "
         "the question. If you don't know the answer, say that you "
-        "don't know. Use three sentences maximum and keep the answer concise.\n\n"
+        "don't know. Use three sentences maximum and keep the answer concise.
+
+"
         "{context}"
     )
 
@@ -106,14 +125,14 @@ def upload_pdf():
     question_answer_chain = create_stuff_documents_chain(llm, prompt)
     rag_chain = create_retrieval_chain(retriever, question_answer_chain)
 
-    return jsonify({"message": "PDF uploaded and processed successfully."})
+    return jsonify({"message": "PDFs processed and RAG built successfully."})
 
 
 @app.route('/ask', methods=['POST'])
 def ask_question():
     global rag_chain
     if rag_chain is None:
-        return jsonify({"error": "PDF not uploaded yet."}), 400
+        return jsonify({"error": "RAG not built yet from PDFs."}), 400
 
     data = request.get_json()
     question = data.get("question")
@@ -129,22 +148,35 @@ def generate_quiz():
     global quiz_cache, retriever
 
     if retriever is None:
-        return jsonify({"error": "PDF not uploaded yet."}), 400
+        return jsonify({"error": "RAG not built yet from PDFs."}), 400
 
     if "quiz" in quiz_cache:
         return jsonify({"quiz": quiz_cache["quiz"]})
 
-    context_docs = retriever.get_relevant_documents("generate a quiz")
-    context_text = "\n\n".join([doc.page_content for doc in context_docs])
+    # Fetch more documents for better quiz generation context
+    context_docs = retriever.get_relevant_documents("generate a quiz about the document content")
+    context_text = "
+
+".join([doc.page_content for doc in context_docs])
 
     prompt = (
-        "You are an expert teacher. Based on the following context from a course PDF, "
-        "generate a JSON quiz with 10 questions. Each question must have:\n"
-        "- a 'question' field,\n"
-        "- an 'options' list (4 options), and\n"
-        "- a 'correct_answer' field.\n"
-        "The output format should be a valid JSON list of objects.\n\n"
-        f"Context:\n{context_text}\n\n"
+        "You are an expert teacher. Based on the following context from the provided documents, "
+        "generate a JSON quiz with 10 multiple-choice questions. "
+        "Each question must have:
+"
+        "- a 'question' field,
+"
+        "- an 'options' list (exactly 4 options), and
+"
+        "- a 'correct_answer' field that matches one of the options.
+"
+        "The output format must be a valid JSON list of objects.
+
+"
+        f"Context:
+{context_text}
+
+"
         "Generate the quiz now:"
     )
 
@@ -152,11 +184,18 @@ def generate_quiz():
 
     try:
         response = llm.invoke(prompt)
-        quiz_cache["quiz"] = response.content
-        return jsonify({"quiz": response.content})
+        # Attempt to parse and re-serialize to ensure valid JSON output
+        quiz_data = json.loads(response.content)
+        quiz_cache["quiz"] = json.dumps(quiz_data)
+        return jsonify({"quiz": quiz_cache["quiz"]})
+    except json.JSONDecodeError as e:
+         print(f"Error decoding JSON from LLM response: {e}")
+         return jsonify({"error": "Failed to generate valid JSON quiz."}), 500
     except Exception as e:
+        print(f"Error generating quiz: {e}")
         return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Consider changing the port if needed
+    app.run(debug=True, port=5001)
