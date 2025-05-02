@@ -27,11 +27,12 @@ const ParticipantsSection = ({ classroomId }) => {
         // Get token from cookie (as done in main.jsx check)
 
         // Actual API Call
-        const response = await axios.get(`${backend_api}/api/classroom/${classroomId}/participants`, {
+        const response = await axios.get(`${backend_api}/api/classrooms/${classroomId}/participants`, {
           withCredentials: true, // Important if backend expects cookies
         });
 
         if (response.data && response.data.success) {
+          console.log("Participants: ", response.data.participants);
             setParticipants(response.data.participants || []);
         } else {
             throw new Error(response.data?.message || 'Failed to fetch participants');
@@ -48,7 +49,7 @@ const ParticipantsSection = ({ classroomId }) => {
 
     fetchParticipants();
   // Add isAuthenticated and authLoading as dependencies
-  }, [classroomId, isAuthenticated, authLoading]);
+  }, []);
 
   // Show loading state from context if it's loading
   if (authLoading) {

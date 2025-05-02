@@ -120,7 +120,7 @@ function Classroom() {
       />
       <ClassroomDetailsPanel selectedClassroom={selectedClassroom} />
       {/* Add ParticipantsSection */}
-      <ParticipantsSection selectedClassroom={selectedClassroom} />
+      <ParticipantsSection classroomId={roomId} />
     </div>
   );
 }

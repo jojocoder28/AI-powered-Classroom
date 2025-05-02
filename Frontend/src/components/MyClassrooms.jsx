@@ -52,7 +52,7 @@ function MyClassrooms() {
         } finally {
             setLoadingMyClassrooms(false);
         }
-    }, [isAuthenticated, backend_api]);
+    }, []);
 
     // Fetch classrooms available for joining (students only)
     const fetchAvailableClassrooms = useCallback(async () => {
