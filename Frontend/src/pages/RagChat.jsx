@@ -36,10 +36,6 @@ const RagChat = () => {
         } finally {
           setClassroomsLoading(false);
         }
-      } else {
-        // Clear classrooms if not authenticated
-        setClassrooms([]);
-        setClassroomsLoading(false);
       }
     };
 
@@ -140,7 +136,7 @@ const RagChat = () => {
     setLoading(true);
     setError('');
 
-    const mlBackendUrl = 'http://localhost:5001'
+    const mlBackendUrl = 'http://localhost:5001'; // Or your deployed ML backend URL
 
     try {
       const response = await axios.post(`${mlBackendUrl}/ask`, {
@@ -168,64 +164,68 @@ const RagChat = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 flex flex-col lg:flex-row">
-      {/* Sidebar for Classroom and PDF Selection */}
-      <div className="lg:w-1/4 w-full pr-4">
-        <h2 className="text-2xl font-bold mb-4 text-teal-700">AI Learn Chat</h2>
+    <div className="container mx-auto p-4 flex flex-col lg:flex-row gap-4 h-[calc(100vh-80px)]">
+      {/* Left Panel for Classroom and PDF Selection */}
+      <div className="lg:w-1/4 w-full bg-white p-6 rounded-lg shadow-md overflow-y-auto">
+        <h2 className="text-2xl font-bold mb-6 text-teal-700">AI Learn</h2>
 
         {/* Classroom Selection */}
-        <div className="mb-4">
-          <label htmlFor="classroomSelect" className="block text-gray-700 text-sm font-bold mb-2">Select Classroom:</label>
+        <div className="mb-6">
+          <label htmlFor="classroomSelect" className="block text-gray-700 text-sm font-semibold mb-2">Select Classroom:</label>
           {classroomsLoading ? (
             <p className="text-gray-600">Loading classrooms...</p>
-          ) : error && !selectedClassroomId ? ( // Show general error only if no classroom is selected yet
-             <p className="text-red-500">{error}</p>
+          ) : error && !selectedClassroomId ? (
+             <p className="text-red-500 text-sm">{error}</p>
           ) : (
-            <select
-              id="classroomSelect"
-              value={selectedClassroomId}
-              onChange={handleClassroomSelect}
-              className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              disabled={classroomsLoading}
-            >
-              <option value="">--Select a Classroom--</option>
-              {classrooms.map(classroom => (
-                <option key={classroom._id} value={classroom._id}>
-                  {classroom.name}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                id="classroomSelect"
+                value={selectedClassroomId}
+                onChange={handleClassroomSelect}
+                className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-teal-500"
+                disabled={classroomsLoading}
+              >
+                <option value="">--Select a Classroom--</option>
+                {classrooms.map(classroom => (
+                  <option key={classroom._id} value={classroom._id}>
+                    {classroom.name}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l-.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+              </div>
+            </div>
            )}
             {!classroomsLoading && classrooms.length === 0 && !error && (
-               <p className="text-gray-600">No enrolled classrooms found.</p>
+               <p className="text-gray-600 text-sm mt-2">No enrolled classrooms found.</p>
             )}
         </div>
 
         {/* Assignment/PDF Selection */}
         {selectedClassroomId && (
-          <div className="mb-4">
-            <h3 className="text-xl font-semibold mb-2 text-teal-700">Assignments:</h3>
-            {loading && !mlLoading ? ( // Use general loading for assignments fetch
+          <div className="mb-6">
+            <h3 className="text-xl font-semibold mb-4 text-teal-700">Assignments:</h3>
+            {loading && !mlLoading ? (
               <p className="text-gray-600">Loading assignments...</p>
-            ) : error && selectedClassroomId && !mlLoading ? ( // Show assignment specific error
-              <p className="text-red-500">{error}</p>
+            ) : error && selectedClassroomId && !mlLoading ? (
+              <p className="text-red-500 text-sm">{error}</p>
             ) : assignments.length > 0 ? (
               <div>
-                 <p className="text-gray-700 text-sm mb-2">Select PDFs to include in RAG:</p>
-                 <ul>
+                 <p className="text-gray-700 text-sm mb-3">Select PDFs to include in AI context:</p>
+                 <ul className="space-y-2">
                   {assignments.map(assignment => (
-                     // Assuming assignment object has a 'submissionFile' object with a 'url'
                     assignment.storagePath && (
-                      <li key={assignment._id} className="mb-1">
-                        <label className="inline-flex items-center text-gray-700">
+                      <li key={assignment._id}>
+                        <label className="inline-flex items-center text-gray-700 cursor-pointer">
                           <input
                             type="checkbox"
-                            className="form-checkbox text-teal-600 focus:ring-teal-600"
+                            className="form-checkbox h-5 w-5 text-teal-600 rounded focus:ring-teal-500"
                             value={assignment.storagePath}
                             checked={selectedPdfUrls.includes(assignment.storagePath)}
                             onChange={() => handlePdfSelect(assignment.storagePath)}
                           />
-                          <span className="ml-2">{assignment.title}</span>
+                          <span className="ml-3 text-gray-800 text-sm">{assignment.title}</span>
                         </label>
                       </li>
                     )
@@ -233,7 +233,7 @@ const RagChat = () => {
                 </ul>
               </div>
             ) : (selectedClassroomId && !loading && !error && (
-              <p className="text-gray-600">No assignments with attached PDFs found in this classroom.</p>
+              <p className="text-gray-600 text-sm">No assignments with attached PDFs found in this classroom.</p>
             ))}
           </div>
         )}
@@ -244,63 +244,68 @@ const RagChat = () => {
               onClick={processPdfsForRag}
               disabled={mlLoading || loading}
               className={
-                `bg-teal-700 hover:bg-teal-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${(mlLoading || loading) && 'opacity-50 cursor-not-allowed'}`
+                `w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-150 ease-in-out ${(mlLoading || loading) && 'opacity-50 cursor-not-allowed'}`
               }
             >
-              {mlLoading ? 'Processing PDFs...' : 'Process Selected PDFs for RAG'}
+              {mlLoading ? 'Processing PDFs...' : 'Process Selected PDFs for AI'}
             </button>
         )}
 
         {ragProcessed && (
-             <p className="text-green-600 mt-2">RAG is ready! You can now ask questions about the selected PDFs.</p>
+             <p className="text-green-600 text-sm mt-4 text-center">AI is ready! You can now ask questions about the selected PDFs.</p>
         )}
-         {mlLoading && <p className="text-blue-600 mt-2">ML Backend Processing...</p>}
+         {mlLoading && <p className="text-blue-600 text-sm mt-4 text-center">AI Backend Processing...</p>}
 
       </div>
 
       {/* Main Chat Panel */}
-      <div className="lg:w-3/4 w-full bg-mint-cream p-4 rounded-lg shadow-md flex flex-col h-[calc(100vh-150px)] overflow-hidden">
-        <h3 className="text-xl font-semibold mb-4 text-teal-700">Chat with AI</h3>
+      <div className="lg:w-3/4 w-full bg-mint-cream p-6 rounded-lg shadow-md flex flex-col h-full">
+        <h3 className="text-2xl font-bold mb-6 text-teal-700 border-b-2 border-teal-100 pb-4">AI Chat</h3>
 
         {/* Chat Display */}
-        <div className="flex-grow overflow-y-auto mb-4 pr-2">
+        <div className="flex-grow overflow-y-auto mb-6 pr-4 space-y-4">
           {chatHistory.map((message, index) => (
-            <div key={index} className={`mb-2 ${message.type === 'user' ? 'text-right' : 'text-left'}`}>
+            <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
               <span
                 className={
-                  `inline-block p-2 rounded-lg ${message.type === 'user' ? 'bg-teal-600 text-white' : message.type === 'rag' ? 'bg-teal-200 text-gray-800' : 'bg-gray-300 text-gray-800'}`
+                  `inline-block p-3 rounded-lg max-w-md whitespace-pre-wrap ${message.type === 'user' ? 'bg-teal-600 text-white rounded-br-none' : message.type === 'rag' ? 'bg-teal-100 text-gray-800 rounded-bl-none' : 'bg-gray-300 text-gray-800 rounded-lg'}`
                 }
               >
                 {message.text}
               </span>
             </div>
           ))}
-           {loading && !mlLoading && <div className="text-center text-gray-600">Getting answer...</div>}
+           {loading && !mlLoading && <div className="text-center text-gray-600 mt-4">Getting answer...</div>}
+           {!ragProcessed && chatHistory.length === 0 && !mlLoading && (
+              <div className="text-center text-gray-600 mt-10">
+                 Select a classroom and assignments, then click "Process Selected PDFs for AI" to start the chat.
+              </div>
+           )}
         </div>
 
         {/* Question Input */}
         {ragProcessed && (
-          <form onSubmit={handleAskQuestion} className="flex">
+          <form onSubmit={handleAskQuestion} className="flex items-center pt-4 border-t-2 border-teal-100">
             <input
               type="text"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="Ask a question about the selected PDFs..."
-              className="flex-grow shadow border rounded-l w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="flex-grow border border-gray-300 rounded-l-lg py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-teal-500"
               disabled={loading || mlLoading}
             />
             <button
               type="submit"
               disabled={loading || mlLoading || !question.trim()}
               className={
-                `bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-r focus:outline-none focus:shadow-outline ${ (loading || mlLoading || !question.trim()) && 'opacity-50 cursor-not-allowed'}`
+                `bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-r-lg focus:outline-none focus:shadow-outline transition duration-150 ease-in-out ${ (loading || mlLoading || !question.trim()) && 'opacity-50 cursor-not-allowed'}`
               }
             >
-              Ask
+              Send
             </button>
           </form>
         )}
-         {error && !loading && !mlLoading && <p className="text-red-500 mt-2">{error}</p>}
+         {error && !loading && !mlLoading && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
       </div>
     </div>
   );
