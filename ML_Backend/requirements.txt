@@ -15,3 +15,5 @@ chromadb
 tiktoken
 fastapi
 uvicorn
+sentence-transformers
+langchain-cohere

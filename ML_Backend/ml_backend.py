@@ -8,8 +8,12 @@ import shutil
 from dotenv import load_dotenv
 import io
 import json
+import requests
+import tempfile
+
 
 # LangChain & Gemini
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
@@ -17,8 +21,10 @@ from langchain_chroma import Chroma
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_cohere import CohereEmbeddings
 
 load_dotenv()
+COHERE_API_KEY = os.getenv('COHERE_API_KEY')
 
 app = Flask(__name__)
 CORS(app)
@@ -58,43 +64,49 @@ retriever = None
 rag_chain = None
 quiz_cache = {}
 
+
 @app.route('/process_assignment_pdfs', methods=['POST'])
 def process_assignment_pdfs():
     global retriever, rag_chain, quiz_cache
 
     data = request.get_json()
-    file_paths = data.get("file_paths", [])
+    file_urls = data.get("file_paths", [])
 
-    if not file_paths:
-        return jsonify({"error": "No file paths provided."}), 400
+    if not file_urls:
+        return jsonify({"error": "No file URLs provided."}), 400
 
-    # Clear previous RAG data and quiz cache
-    # Note: If you want to maintain RAG across multiple calls, you might need a different approach
-    # For this implementation, each call processes a new set of PDFs.
     retriever = None
     rag_chain = None
     quiz_cache.clear()
-
     all_documents = []
-    for file_path in file_paths:
+
+    for url in file_urls:
         try:
-            loader = PyPDFLoader(file_path)
+            response = requests.get(url)
+            if response.status_code != 200:
+                print(f"Failed to fetch PDF from {url}")
+                continue
+            
+            with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+                tmp.write(response.content)
+                tmp_path = tmp.name
+
+            loader = PyPDFLoader(tmp_path)
             all_documents.extend(loader.load())
+
+            # Delete temp file after use
+            os.remove(tmp_path)
+
         except Exception as e:
-            print(f"Error loading PDF {file_path}: {e}")
-            # Optionally, you might want to return an error or skip this file
-            continue # Skip to the next file if one fails to load
+            print(f"Error loading PDF from {url}: {e}")
+            continue
 
     if not all_documents:
-        return jsonify({"error": "No documents could be loaded from the provided paths."}), 400
+        return jsonify({"error": "No documents could be loaded from the provided URLs."}), 400
 
-    # PDF Processing (using combined documents)
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000)
     docs = splitter.split_documents(all_documents)
 
-    # Assuming you still want to use Chroma for vector storage
-    # Consider clearing previous Chroma data if necessary, depending on your needs
-    # For this implementation, we create a new vector store each time
     try:
         vectorstore = Chroma.from_documents(
             docs,
@@ -105,15 +117,13 @@ def process_assignment_pdfs():
         print(f"Error creating vectorstore or retriever: {e}")
         return jsonify({"error": "Failed to create RAG components."}), 500
 
-    llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro", temperature=0)
+    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0)
 
     system_prompt = (
         "You are an assistant for question-answering tasks. "
-        "Use the following pieces of retrieved context to answer "
-        "the question. If you don't know the answer, say that you "
-        "don't know. Use three sentences maximum and keep the "
-        "answer concise.\n\n"
-        "{context}"
+        "Use the following pieces of retrieved context to answer the question. "
+        "If you don't know the answer, say that you don't know. "
+        "Use three sentences maximum and keep the answer concise.\n\n{context}"
     )
 
     prompt = ChatPromptTemplate.from_messages([
@@ -124,7 +134,7 @@ def process_assignment_pdfs():
     question_answer_chain = create_stuff_documents_chain(llm, prompt)
     rag_chain = create_retrieval_chain(retriever, question_answer_chain)
 
-    return jsonify({"message": "PDFs processed and RAG built successfully."})
+    return jsonify({"message": "PDFs from URLs processed and RAG built successfully."})
 
 
 @app.route('/ask', methods=['POST'])
@@ -168,7 +178,7 @@ def generate_quiz():
         "Generate the quiz now:"
     )
 
-    llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro", temperature=0)
+    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0)
 
     try:
         response = llm.invoke(prompt)

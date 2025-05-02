@@ -101,7 +101,7 @@ const RagChat = () => {
     setChatHistory([]); // Clear chat history on reprocessing
 
     // Replace with the actual URL of your ML backend
-    const mlBackendUrl = 'http://localhost:5000'; // Or your deployed ML backend URL
+    const mlBackendUrl = 'http://localhost:5001'; // Or your deployed ML backend URL
 
     try {
       const response = await axios.post(`${mlBackendUrl}/process_assignment_pdfs`, {
@@ -140,7 +140,7 @@ const RagChat = () => {
     setLoading(true);
     setError('');
 
-    const mlBackendUrl = 'http://localhost:5000'; // Or your deployed ML backend URL
+    const mlBackendUrl = 'http://localhost:5001'; // Or your deployed ML backend URL
 
     try {
       const response = await axios.post(`${mlBackendUrl}/ask`, {
@@ -215,15 +215,15 @@ const RagChat = () => {
                  <ul>
                   {assignments.map(assignment => (
                      // Assuming assignment object has a 'submissionFile' object with a 'url'
-                    assignment.submissionFile?.url && (
+                    assignment.storagePath && (
                       <li key={assignment._id} className="mb-1">
                         <label className="inline-flex items-center">
                           <input
                             type="checkbox"
                             className="form-checkbox"
-                            value={assignment.submissionFile.url}
-                            checked={selectedPdfUrls.includes(assignment.submissionFile.url)}
-                            onChange={() => handlePdfSelect(assignment.submissionFile.url)}
+                            value={assignment.storagePath}
+                            checked={selectedPdfUrls.includes(assignment.storagePath)}
+                            onChange={() => handlePdfSelect(assignment.storagePath)}
                           />
                           <span className="ml-2 text-gray-700">{assignment.title}</span>
                         </label>
