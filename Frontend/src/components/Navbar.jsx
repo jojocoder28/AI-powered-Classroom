@@ -73,15 +73,17 @@ const Navbar = () => {
 
         {/* Navigation Links & Controls (Desktop) */}
         <div className="hidden md:flex items-center space-x-6">
-          <Link to="/" className="text-gray-700 hover:text-teal-600">Home</Link>
-          <Link to="/features" className="text-gray-700 hover:text-teal-600">Features</Link> {/* Assuming a /features route */}
-          <Link to="/contact" className="text-gray-700 hover:text-teal-600">Contact Us</Link> {/* Assuming a /contact route */}
+          <Link to="/" className="text-gray-300 hover:text-teal-600">Home</Link>
+          <Link to="/features" className="text-gray-300 hover:text-teal-600">Features</Link> {/* Assuming a /features route */}
+          <Link to="/contact" className="text-gray-300 hover:text-teal-600">Contact Us</Link> {/* Assuming a /contact route */}
 
           <div className="flex items-center space-x-4">
             {/* Auth Buttons or User Info */}
             {isAuthenticated && user?.email ? ( // Check isAuthenticated and if user object exists and has name
               <div className="flex items-center space-x-4">
-                <span className="text-gray-700">Welcome, {user.username}!</span>
+                {/* <span className="text-gray-300"></span> */}
+          <Link to="/profile" className="text-gray-300 hover:text-teal-600">{user.username}</Link> {/* Assuming a /contact route */}
+
                  <button
                     onClick={handleLogout}
                     className="cursor-pointer px-4 py-2 text-sm text-teal-600 border border-teal-600 rounded-md hover:bg-teal-50"
