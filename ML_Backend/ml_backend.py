@@ -111,9 +111,7 @@ def process_assignment_pdfs():
         "You are an assistant for question-answering tasks. "
         "Use the following pieces of retrieved context to answer "
         "the question. If you don't know the answer, say that you "
-        "don't know. Use three sentences maximum and keep the answer concise.
-
-"
+        "don't know. Use three sentences maximum and keep the answer concise."
         "{context}"
     )
 
@@ -155,28 +153,17 @@ def generate_quiz():
 
     # Fetch more documents for better quiz generation context
     context_docs = retriever.get_relevant_documents("generate a quiz about the document content")
-    context_text = "
-
-".join([doc.page_content for doc in context_docs])
+    context_text = "".join([doc.page_content for doc in context_docs])
 
     prompt = (
         "You are an expert teacher. Based on the following context from the provided documents, "
         "generate a JSON quiz with 10 multiple-choice questions. "
-        "Each question must have:
-"
-        "- a 'question' field,
-"
-        "- an 'options' list (exactly 4 options), and
-"
-        "- a 'correct_answer' field that matches one of the options.
-"
-        "The output format must be a valid JSON list of objects.
-
-"
-        f"Context:
-{context_text}
-
-"
+        "Each question must have:"
+        "- a 'question' field,"
+        "- an 'options' list (exactly 4 options), and"
+        "- a 'correct_answer' field that matches one of the options."
+        "The output format must be a valid JSON list of objects."
+        f"Context:{context_text}"
         "Generate the quiz now:"
     )
 

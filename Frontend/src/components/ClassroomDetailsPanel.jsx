@@ -2,7 +2,7 @@ import React from 'react';
 import ParticipantsSection from '../components/ParticipantsSection';
 import VideoCallSection from './VideoCallSection'; // Assuming these will be in the same components folder
 import AssignmentsSection from './AssignmentsSection';
-import ChatSection from './ChatSection';
+//import ChatSection from './ChatSection';
 import VideoPage from './VideoPage';
 
 const ClassroomDetailsPanel = ({
@@ -20,7 +20,10 @@ const ClassroomDetailsPanel = ({
           <VideoPage roomId={selectedClassroom._id} />
           <AssignmentsSection classroomId={selectedClassroom._id} />
           {/* Chat might be independent or tied to the classroom */}
-          <ChatSection classroomId={selectedClassroom._id} />
+          {/* <ChatSection classroomId={selectedClassroom._id} /> */}
+          <VideoCallSection classroom={selectedClassroom} />
+
+          {/* Add any other sections you want to include here */}
 
         </div>
       ) : (
