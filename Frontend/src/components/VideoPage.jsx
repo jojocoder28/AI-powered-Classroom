@@ -1,14 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
-import { backend_api, appID, serverSecret } from '../config'; // Adjust the import based on your project structure
+
 const VideoPage = () => {
-  const { id } = useParams();
+  const { roomId } = useParams();
   const containerRef = useRef(null);
-  const roomID = id;
+  const roomID = roomId;
 
   useEffect(() => {
-
+    const appID = 1097934302;
+    const serverSecret = "be54dd9f65284705e25a9f2907b977ec";
     const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
       appID,
       serverSecret,

@@ -78,11 +78,11 @@ function Classroom() {
   const handleJoinClassroom = () => {
     // TODO: Use a modal form
     // TODO: Implement API call to join classroom using token
-    const joinCode = prompt('Enter classroom code to join:');
-    if (joinCode && isAuthenticated) {
-      console.log(`Attempting to join classroom with code: ${joinCode}`);
+    // const joinCode = prompt('Enter classroom code to join:');
+    if (roomId && isAuthenticated) {
+      console.log(`Attempting to join classroom with code: ${roomId}`);
       // Placeholder: API call
-      alert('Join functionality needs backend implementation.');
+      // alert('Join functionality needs backend implementation.');
       // Navigate to video page after attempting to join
       navigate(`/classroom/${roomId}/video`);
     } else if (!isAuthenticated) {

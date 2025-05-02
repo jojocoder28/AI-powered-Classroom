@@ -24,6 +24,7 @@ const ClassroomDetailsPanel = ({
         </div>
       ) : (
         <div className="flex items-center justify-center h-full">
+          
            <p className="text-gray-500 dark:text-gray-400 text-lg">Select a classroom from the list to view details.</p>
         </div>
       )}
