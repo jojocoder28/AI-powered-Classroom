@@ -6,9 +6,7 @@ import { backend_api } from '../config';
 
 import ClassroomListPanel from '../components/ClassroomListPanel';
 import ClassroomDetailsPanel from '../components/ClassroomDetailsPanel';
-import ParticipantsSection from '../components/ParticipantsSection'; // Import the ParticipantsSection
-
-// --- Main Classroom Page Component ---
+import ParticipantsSection from '../components/ParticipantsSection';
 
 function Classroom() {
   const { roomId } = useParams();
@@ -18,34 +16,29 @@ function Classroom() {
   const [classrooms, setClassrooms] = useState([]);
   const [selectedClassroom, setSelectedClassroom] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError]=useState(null);
+  const [error, setError] = useState(null);
 
-  // --- Fetch User's Classrooms (Requires Auth) ---
   useEffect(() => {
     if (authLoading) return;
     if (!isAuthenticated) {
-        setClassrooms([]);
-        setSelectedClassroom(null);
-        // Optional: Redirect to login if accessing this page directly requires auth
-        // navigate('/login');
-        return;
+      setClassrooms([]);
+      setSelectedClassroom(null);
+      return;
     }
 
     const fetchClassrooms = async () => {
       setIsLoading(true);
       setError(null);
-      console.log('Fetching user classrooms...');
       try {
         const response = await axios.get(`${backend_api}/api/classrooms/${roomId}`, {
-            withCredentials: true,
+          withCredentials: true,
         });
 
-        if (response.data && response.data.success) {
-            setClassrooms(response.data.classrooms || []);
+        if (response.data?.success) {
+          setClassrooms(response.data.classrooms || []);
         } else {
-            throw new Error(response.data?.message || 'Failed to fetch classrooms');
+          throw new Error(response.data?.message || 'Failed to fetch classrooms');
         }
-
       } catch (err) {
         console.error("Error fetching classrooms:", err);
         setError(err.message || 'Could not load classrooms.');
@@ -58,74 +51,94 @@ function Classroom() {
     fetchClassrooms();
   }, [isAuthenticated, authLoading, navigate]);
 
-    // --- Classroom Actions (Placeholders - Implement with API calls) ---
   const handleCreateClassroom = () => {
-    // TODO: Use a modal form instead of prompt
-    // TODO: Implement API call to create classroom using token from context/cookie
-    const newName = roomId
+    const newName = roomId;
     if (newName && isAuthenticated) {
-      console.log(`Creating classroom: ${newName}`);
-      // Placeholder: API call
-      // On success: refetch classrooms or add to state
-      const newClassroom = { _id:roomId, name: newName, description: 'Newly created (Simulated)' }; // Use _id for consistency
+      const newClassroom = { _id: roomId, name: newName, description: 'Newly created (Simulated)' };
       setClassrooms([...classrooms, newClassroom]);
       setSelectedClassroom(newClassroom);
     } else if (!isAuthenticated) {
-        alert("Please log in to create a classroom.");
+      alert("Please log in to create a classroom.");
     }
   };
 
   const handleJoinClassroom = () => {
-    // TODO: Use a modal form
-    // TODO: Implement API call to join classroom using token
-    // const joinCode = prompt('Enter classroom code to join:');
     if (roomId && isAuthenticated) {
-      console.log(`Attempting to join classroom with code: ${roomId}`);
-      // Placeholder: API call
-      // alert('Join functionality needs backend implementation.');
-      // Navigate to video page after attempting to join
-      const newClassroom = { _id:roomId, name: roomId, description: 'Chop' }; // Use _id for consistency
-
+      const newClassroom = { _id: roomId, name: roomId, description: 'Joined class' };
       setSelectedClassroom(newClassroom);
       navigate(`/classroom/${roomId}`);
     } else if (!isAuthenticated) {
-        alert("Please log in to join a classroom.");
+      alert("Please log in to join a classroom.");
     }
   };
 
-  // --- Render Logic ---
-
-  // Show main loading indicator while checking auth or fetching initial data
-   if (authLoading || (isLoading && !classrooms.length)) {
-    return <div className="p-4 flex justify-center items-center h-screen">Loading...</div>;
+  if (authLoading || (isLoading && !classrooms.length)) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-lg font-medium animate-pulse">Loading...</p>
+      </div>
+    );
   }
 
-  // Handle case where user is not logged in
   if (!isAuthenticated && !authLoading) {
-      return (
-          <div className="p-4 text-center">
-              <p className="mb-4">Please log in to access your classrooms.</p>
-              <Link to="/login" className="text-blue-600 hover:underline">Go to Login</Link>
-          </div>
-      );
+    return (
+      <div className="p-10 text-center">
+        <p className="mb-4 text-xl">Please log in to access your classrooms.</p>
+        <Link to="/login" className="text-blue-600 font-semibold hover:underline">Go to Login</Link>
+      </div>
+    );
   }
 
   return (
-    <div className="flex h-[calc(100vh-theme(space.16))]">
-      <ClassroomListPanel
-        classrooms={classrooms}
-        isLoading={isLoading}
-        error={error}
-        selectedClassroom={selectedClassroom}
-        setSelectedClassroom={setSelectedClassroom}
-        handleCreateClassroom={handleCreateClassroom}
-        handleJoinClassroom={handleJoinClassroom}
-        isAuthenticated={isAuthenticated}
-        user={user}
-      />
-      <ClassroomDetailsPanel selectedClassroom={selectedClassroom} />
-      {/* Add ParticipantsSection */}
-      <ParticipantsSection classroomId={roomId} />
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 px-6 py-6 space-y-6 overflow-x-hidden">
+      {/* Header Section */}
+      <header className="text-center">
+        <h1 className="text-3xl font-bold text-indigo-700">Welcome to the Classroom</h1>
+        <p className="text-md text-gray-500 mt-1">Manage your learning space effortlessly</p>
+      </header>
+
+      {/* Classroom List */}
+      <section className="bg-white rounded-2xl shadow-md p-6">
+        <h2 className="text-xl font-semibold mb-4">Your Classrooms</h2>
+        <ClassroomListPanel
+          classrooms={classrooms}
+          isLoading={isLoading}
+          error={error}
+          selectedClassroom={selectedClassroom}
+          setSelectedClassroom={setSelectedClassroom}
+          handleCreateClassroom={handleCreateClassroom}
+          handleJoinClassroom={handleJoinClassroom}
+          isAuthenticated={isAuthenticated}
+          user={user}
+        />
+      </section>
+
+      {/* Classroom Details */}
+      {selectedClassroom && (
+        <section className="bg-white rounded-2xl shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-4">Classroom Details</h2>
+          <ClassroomDetailsPanel selectedClassroom={selectedClassroom} />
+        </section>
+      )}
+
+      {/* Participants */}
+      <section className="bg-white rounded-2xl shadow-md p-6">
+        <h2 className="text-xl font-semibold mb-4">Participants</h2>
+        <ParticipantsSection classroomId={roomId} />
+      </section>
+
+      {/* Placeholder for Video/Assignment
+      <section className="bg-white rounded-2xl shadow-md p-6">
+        <h2 className="text-xl font-semibold mb-4">Live Sessions & Assignments</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="p-4 border border-indigo-100 rounded-lg bg-indigo-50">
+            <p className="text-indigo-700 font-medium">Video Call Feature Coming Soon</p>
+          </div>
+          <div className="p-4 border border-green-100 rounded-lg bg-green-50">
+            <p className="text-green-700 font-medium">Assignment Upload Area</p>
+          </div>
+        </div>
+      </section> */}
     </div>
   );
 }

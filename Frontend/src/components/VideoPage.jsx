@@ -4,7 +4,6 @@ import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 
 const VideoPage = (ref) => {
   const roomId = ref.roomId;
-  const containerRef = useRef(null);
   const roomID = roomId;
 
   useEffect(() => {
@@ -19,8 +18,12 @@ const VideoPage = (ref) => {
     );
 
     const zp = ZegoUIKitPrebuilt.create(kitToken);
+    
+    // Get the container element by its ID
+    const container = document.getElementById('zego-container');
+
     zp.joinRoom({
-      container: containerRef.current,
+      container: container,
       sharedLinks: [
         {
           name: 'Copy link',
@@ -39,8 +42,11 @@ const VideoPage = (ref) => {
     });
 
     // After some time, start frame capturing
+    // Note: Frame capturing logic might need adjustment without direct ref access
+    // If container.querySelector('video') still works, keep it. Otherwise, 
+    // you might need a different approach to access the video element.
     const captureInterval = setInterval(() => {
-      const video = containerRef.current?.querySelector('video');
+      const video = container?.querySelector('video');
       if (video && video.readyState >= 2) {
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
@@ -76,7 +82,7 @@ const VideoPage = (ref) => {
     return () => clearInterval(captureInterval);
   }, [roomID]);
 
-  return <div ref={containerRef} style={{ zIndex:100, width: '100%', height: '100vh' }} />;
+  return <div id="zego-container" style={{ zIndex:100, width: '100%', height: '100vh' }} />;
 };
 
-export default VideoPage;
+export default VideoPage;
