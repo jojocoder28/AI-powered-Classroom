@@ -4,9 +4,10 @@ import { Context } from '../main'; // Adjust the import path if necessary
 import { backend_api } from '../config'; // Assuming backend_api is your main backend URL
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChalkboardTeacher, faFilePdf, faBolt, faCircleCheck, faSpinner, faPaperPlane, faBookOpen, faMagic, faQuestionCircle, faSquarePollVertical, faClock } from '@fortawesome/free-solid-svg-icons';
+import { toast } from 'react-toastify'; // Assuming you are using react-toastify
 
 const RagChat = () => {
-  const { isAuthenticated } = useContext(Context); // Removed user from context here
+  const { isAuthenticated, user } = useContext(Context); // Get user from context here
   const [classrooms, setClassrooms] = useState([]);
   const [selectedClassroomId, setSelectedClassroomId] = useState('');
   const [assignments, setAssignments] = useState([]);
@@ -63,6 +64,7 @@ const RagChat = () => {
         setUserAnswers({});
         setChatHistory([]); // Clear chat when classroom changes
         setRagProcessed(false);
+        setCurrentView('chat'); // Reset view to chat when classroom changes
         try {
           // Assuming assignments are fetched from /api/v1/classroom/:id/assignments
           const response = await axios.get(`${backend_api}/api/classrooms/${selectedClassroomId}/assignments`, {
@@ -89,6 +91,7 @@ const RagChat = () => {
       setQuiz(null);
       setQuizResult(null);
       setUserAnswers({});
+      setCurrentView('chat'); // Reset view to chat when classroom is cleared
     }
   }, [selectedClassroomId, backend_api]);
 
@@ -184,10 +187,12 @@ const RagChat = () => {
   const handleGenerateQuiz = async () => {
     if (!ragProcessed) {
       setError('Please process PDFs for AI first before generating a quiz.');
+      toast.error('Please process PDFs for AI first before generating a quiz.');
       return;
     }
     if(selectedPdfUrls.length === 0){
       setError('Please select at least one PDF to generate a quiz from.');
+      toast.error('Please select at least one PDF to generate a quiz from.');
       return;
     }
 
@@ -214,20 +219,24 @@ const RagChat = () => {
          try {
            const parsedQuiz = JSON.parse(quizText);
            setQuiz(parsedQuiz);
+            toast.success('Quiz generated successfully!');
          } catch (parseError) {
            console.error('Error parsing quiz JSON:', parseError);
            setError('Failed to parse quiz data from the AI.');
+           toast.error('Failed to parse quiz data from the AI.');
            setCurrentView('chat'); // Go back to chat view on parsing error
          }
 
       } else {
          setError(response.data.error || 'Failed to generate quiz.');
+         toast.error(response.data.error || 'Failed to generate quiz.');
          setCurrentView('chat'); // Go back to chat view on generation error
       }
 
     } catch (err) {
       console.error('Error generating quiz:', err);
-      setError('Failed to generate quiz.');
+      setError('Failed to generate quiz. Make sure the ML backend is running and the /generate_quiz endpoint is available.');
+      toast.error('Failed to generate quiz. Make sure the AI backend is running and the /generate_quiz endpoint is available.');
       setCurrentView('chat'); // Go back to chat view on API error
     } finally {
       setQuizLoading(false);
@@ -241,20 +250,57 @@ const RagChat = () => {
     }));
   };
 
-  const handleSubmitQuiz = () => {
+  const handleSubmitQuiz = async () => { // Make the function async
     setSubmittingQuiz(true);
     let score = 0;
     const detailedResults = quiz.map((q, index) => {
-      const correct = q.correct_answer === userAnswers[index];
+      const selected = userAnswers[index] || 'Not attempted';
+      const correct = q.correct_answer === selected;
       if (correct) score++;
       return {
         question: q.question,
-        selected: userAnswers[index] || 'Not attempted',
-        correct: q.correct_answer,
+        selectedAnswer: selected, // Use selectedAnswer to match backend schema
+        correctAnswer: q.correct_answer, // Use correctAnswer to match backend schema
         isCorrect: correct,
       };
     });
-    setQuizResult({ score, detailedResults });
+
+    const totalQuestions = quiz.length;
+    const percentage = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0;
+
+    setQuizResult({ score, detailedResults, percentage }); // Update frontend state with percentage
+
+    // --- Add this section to send data to backend ---
+    try {
+        const studentId = user?._id; // Get studentId from context user object
+
+        if (!studentId) {
+            setError('User not authenticated. Cannot save quiz result.');
+            toast.error('User not authenticated. Cannot save quiz result.');
+            setSubmittingQuiz(false);
+            return;
+        }
+
+        const response = await axios.post(`${backend_api}/api/quizresults/save`, {
+            studentId: studentId,
+            classroomId: selectedClassroomId,
+            assignmentPaths: selectedPdfUrls, // Send the array of PDF URLs/paths
+            score: score,
+            totalQuestions: totalQuestions,
+            detailedResults: detailedResults,
+            // percentage is calculated in the backend, but you could send it too if needed
+        }, { withCredentials: true }); // Include withCredentials if your backend requires it
+
+        console.log('Quiz result saved:', response.data);
+        toast.success("Quiz result saved successfully!");
+
+    } catch (err) {
+        console.error('Error saving quiz result:', err.response?.data?.message || err.message);
+        setError('Failed to save quiz result.');
+        toast.error(err.response?.data?.message || "Failed to save quiz result.");
+    }
+    // --- End of backend sending section ---
+
     setSubmittingQuiz(false);
   };
 
@@ -480,7 +526,7 @@ return (
                <div className="flex-grow overflow-y-auto mb-6 pr-4 space-y-4">
                  <h3 className="text-xl font-bold text-teal-700 mb-4 flex items-center gap-2">
                   <FontAwesomeIcon icon={faSquarePollVertical} />
-                   Your Quiz Results: <span className="text-green-600">{quizResult.score} / {quiz.length}</span>
+                   Your Quiz Results: <span className="text-green-600">{quizResult.score} / {quiz.length} ({quizResult.percentage.toFixed(2)}%)</span>
                  </h3>
                  <h4 className="text-lg font-semibold text-gray-800 mb-3">Detailed Feedback:</h4>
                  <div className="space-y-4">
@@ -488,11 +534,11 @@ return (
                      <div key={i} className={`p-4 rounded-lg shadow-sm ${res.isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
                        <p className="text-gray-800 font-semibold">{i + 1}. {res.question}</p>
                        <p className={`mt-1 text-sm ${res.isCorrect ? 'text-green-700' : 'text-red-700'}`}>
-                         <strong>Your Answer:</strong> {res.selected}
+                         <strong>Your Answer:</strong> {res.selectedAnswer}
                        </p>
                        {!res.isCorrect && (
                          <p className="mt-1 text-sm text-gray-700">
-                           <strong>Correct Answer:</strong> {res.correct}
+                           <strong>Correct Answer:</strong> {res.correctAnswer}
                          </p>
                        )}
                      </div>

@@ -4,10 +4,11 @@ const http = require("http");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const socketIo = require("socket.io");
-const router = require("./routes/users");
+const userRouter = require("./routes/users"); // Assuming this is the user router
 const conferenceRouter = require("./routes/conferenceRouter");
 const { initializeSocket } = require("./controller/conferenceController");
 const classroomRouter = require('./routes/classroomRouter');
+const quizResultRouter = require("./routes/quizResultRouter"); // Import the new router
 const errorHandler = require("./middlewares/errorHandler");
 const cookieParser = require('cookie-parser');
 
@@ -39,9 +40,10 @@ app.use(cors({
 app.use(express.json()); // Parse JSON request body
 
 //! Routes
-app.use("/api/users", router);
+app.use("/api/users", userRouter);
 app.use("/api/conference", conferenceRouter);
 app.use('/api/classrooms', classroomRouter);
+app.use("/api/quizresults", quizResultRouter); // Use the new router
 
 //! Initialize Socket.io
 initializeSocket(io);
