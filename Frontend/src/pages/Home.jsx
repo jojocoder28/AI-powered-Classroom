@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import Footer from '../components/Footer'; // Import Footer
 
 const Home = () => {
   return (
@@ -84,6 +85,7 @@ const Home = () => {
         </div>
       </section>
 
+      <Footer /> {/* Add Footer component */}
     </div>
   );
 };

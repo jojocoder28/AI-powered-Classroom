@@ -22,7 +22,6 @@ function Profile() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-<<<<<<< HEAD
       setLoading(true);
       setError('');
       setMessage('');
@@ -32,17 +31,6 @@ function Profile() {
       setFormData({});
       setProfile(null);
 
-=======
-      setLoading(true); // Start loading
-      setError(''); // Clear previous errors
-      setMessage(''); // Clear previous messages
-      setEditMode(false); // Exit edit mode when fetching a new profile
-      setPreviewImage(null); // Clear preview image
-      setImageFile(null); // Clear image file
-      setFormData({}); // Clear form data
-      setProfile(null); // Clear previous profile data
-      console.log(userId);
->>>>>>> ccbcbfafc9111c2884cd03c1178e257f77520e81
       try {
         let url;
         if (userId) {
@@ -184,7 +172,7 @@ function Profile() {
       {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
 
       {/* Profile Card */}
-      <div className="max-w-sm mx-auto bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden md:max-w-2xl my-8">
+      <div className="max-w-sm mx-auto bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden md:max-w-2xl my-4">
         <div className="md:flex">
           <div className="md:flex-shrink-0 p-4 flex items-center justify-center">
             <div className="relative w-36 h-36">
@@ -212,7 +200,7 @@ function Profile() {
           </div>
           <div className="p-8 flex-grow">
             <div className="uppercase tracking-wide text-sm text-teal-400 dark:text-teal-400 font-semibold">{profile.role || 'User'}</div>
-            <h2 className="block mt-1 text-2xl leading-tight font-medium text-mint-cream dark:text-mint-cream">{profile.username || 'N/A'}</h2>
+            <h2 className="block mt-1 text-xl leading-tight font-medium text-white dark:text-white">{profile.username || 'N/A'}</h2>
             {profile.role === 'Teacher' && profile.designation && (
                  <p className="mt-2 text-gray-400 dark:text-gray-400">{profile.designation}</p>
              )}
@@ -244,7 +232,7 @@ function Profile() {
             </div>
 
              {/* Buttons Section */}
-            <div className="mt-8 flex space-x-4">
+            <div className="mt-8 flex space-x-4 justify-center">
                 {!isMyProfile && (
                     <button
                         onClick={() => { /* Handle Chat Action */ console.log('Chat button clicked'); /* Add chat logic here */ }}
@@ -270,7 +258,7 @@ function Profile() {
             </div>
 
              {!isMyProfile && profile && (
-                 <p className="mt-4 text-gray-400 dark:text-gray-400">You are viewing {profile.username}'s profile.</p>
+                 <p className="mt-4 text-gray-400 dark:text-gray-400 text-center">You are viewing {profile.username}'s profile.</p>
              )}
           </div>
         </div>
@@ -278,7 +266,7 @@ function Profile() {
 
       {/* Edit Mode Form - Only show if in edit mode AND it's my profile */}
       {editMode && isMyProfile && (
-        <div className="w-full max-w-lg mx-auto mt-6 bg-white dark:bg-gray-700 p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-lg mx-auto mt-2 bg-white dark:bg-gray-700 p-6 rounded-xl shadow-lg">
           <h2 className="text-xl font-semibold mb-4 text-teal-800 dark:text-mint-cream">Edit Profile</h2>
 
           {fieldsToShow.map((field) => (
