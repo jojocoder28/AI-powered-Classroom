@@ -6,6 +6,7 @@ import { backend_api } from '../config';
 
 import ClassroomListPanel from '../components/ClassroomListPanel';
 import ClassroomDetailsPanel from '../components/ClassroomDetailsPanel';
+import ParticipantsSection from '../components/ParticipantsSection'; // Import the ParticipantsSection
 
 // --- Main Classroom Page Component ---
 
@@ -17,7 +18,7 @@ function Classroom() {
   const [classrooms, setClassrooms] = useState([]);
   const [selectedClassroom, setSelectedClassroom] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError]=useState(null);
 
   // --- Fetch User's Classrooms (Requires Auth) ---
   useEffect(() => {
@@ -118,6 +119,8 @@ function Classroom() {
         user={user}
       />
       <ClassroomDetailsPanel selectedClassroom={selectedClassroom} />
+      {/* Add ParticipantsSection */}
+      <ParticipantsSection selectedClassroom={selectedClassroom} />
     </div>
   );
 }
