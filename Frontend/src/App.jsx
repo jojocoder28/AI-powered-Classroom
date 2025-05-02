@@ -14,6 +14,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Classroom = lazy(() => import('./pages/Classroom'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Settings = lazy(() => import('./pages/Settings'));
+const RagChat = lazy(() => import('./pages/RagChat')); // Lazy load RagChat
 // const VideoPage = lazy(() => import('./components/VideoPage')); // Lazy load VideoPage
 
 // Protected Route Component
@@ -25,7 +26,10 @@ const ProtectedRoute = ({ children }) => {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
-  return user ? children : <Navigate to="/login" replace />;
+  // Check if user is authenticated. The user object should exist and have an _id or similar property
+  // Adjust the check based on how your user object is structured when authenticated vs not.
+  // Assuming `user` is null or empty when not authenticated.
+  return user && user._id ? children : <Navigate to="/login" replace />;
 };
 
 function AppContent() {
@@ -73,6 +77,10 @@ function AppContent() {
             <Route
               path="/settings"
               element={<ProtectedRoute><Settings /></ProtectedRoute>}
+            />
+            <Route
+              path="/ragchat" // New protected route for RagChat
+              element={<ProtectedRoute><RagChat /></ProtectedRoute>}
             />
 
             {/* Redirect any unknown paths to home or a 404 page */}
