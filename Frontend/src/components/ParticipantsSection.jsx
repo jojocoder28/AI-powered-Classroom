@@ -25,27 +25,9 @@ const ParticipantsSection = ({ classroomId }) => {
       console.log(`Participants: Fetching for classroom ${classroomId}`);
       try {
         // Get token from cookie (as done in main.jsx check)
-        const nameEQ = "token=";
-        const ca = document.cookie.split(';');
-        let token = null;
-        for(let i=0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-            if (c.indexOf(nameEQ) === 0) {
-                token = c.substring(nameEQ.length, c.length);
-                break;
-            }
-        }
-
-        if (!token) {
-          throw new Error('Authentication token not found in cookie.');
-        }
 
         // Actual API Call
-        const response = await axios.get(`${backend_api}/api/v1/classroom/${classroomId}/participants`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
+        const response = await axios.get(`${backend_api}/api/classroom/${classroomId}/participants`, {
           withCredentials: true, // Important if backend expects cookies
         });
 
