@@ -140,7 +140,7 @@ const RagChat = () => {
     setLoading(true);
     setError('');
 
-    const mlBackendUrl = 'http://localhost:5001'; // Or your deployed ML backend URL
+    const mlBackendUrl = 'http://localhost:5001
 
     try {
       const response = await axios.post(`${mlBackendUrl}/ask`, {
@@ -171,13 +171,13 @@ const RagChat = () => {
     <div className="container mx-auto p-4 flex flex-col lg:flex-row">
       {/* Sidebar for Classroom and PDF Selection */}
       <div className="lg:w-1/4 w-full pr-4">
-        <h2 className="text-2xl font-bold mb-4">RAG Chat</h2>
+        <h2 className="text-2xl font-bold mb-4 text-teal-700">AI Learn Chat</h2>
 
         {/* Classroom Selection */}
         <div className="mb-4">
           <label htmlFor="classroomSelect" className="block text-gray-700 text-sm font-bold mb-2">Select Classroom:</label>
           {classroomsLoading ? (
-            <p>Loading classrooms...</p>
+            <p className="text-gray-600">Loading classrooms...</p>
           ) : error && !selectedClassroomId ? ( // Show general error only if no classroom is selected yet
              <p className="text-red-500">{error}</p>
           ) : (
@@ -197,16 +197,16 @@ const RagChat = () => {
             </select>
            )}
             {!classroomsLoading && classrooms.length === 0 && !error && (
-               <p>No enrolled classrooms found.</p>
+               <p className="text-gray-600">No enrolled classrooms found.</p>
             )}
         </div>
 
         {/* Assignment/PDF Selection */}
         {selectedClassroomId && (
           <div className="mb-4">
-            <h3 className="text-xl font-semibold mb-2">Assignments:</h3>
+            <h3 className="text-xl font-semibold mb-2 text-teal-700">Assignments:</h3>
             {loading && !mlLoading ? ( // Use general loading for assignments fetch
-              <p>Loading assignments...</p>
+              <p className="text-gray-600">Loading assignments...</p>
             ) : error && selectedClassroomId && !mlLoading ? ( // Show assignment specific error
               <p className="text-red-500">{error}</p>
             ) : assignments.length > 0 ? (
@@ -217,15 +217,15 @@ const RagChat = () => {
                      // Assuming assignment object has a 'submissionFile' object with a 'url'
                     assignment.storagePath && (
                       <li key={assignment._id} className="mb-1">
-                        <label className="inline-flex items-center">
+                        <label className="inline-flex items-center text-gray-700">
                           <input
                             type="checkbox"
-                            className="form-checkbox"
+                            className="form-checkbox text-teal-600 focus:ring-teal-600"
                             value={assignment.storagePath}
                             checked={selectedPdfUrls.includes(assignment.storagePath)}
                             onChange={() => handlePdfSelect(assignment.storagePath)}
                           />
-                          <span className="ml-2 text-gray-700">{assignment.title}</span>
+                          <span className="ml-2">{assignment.title}</span>
                         </label>
                       </li>
                     )
@@ -233,7 +233,7 @@ const RagChat = () => {
                 </ul>
               </div>
             ) : (selectedClassroomId && !loading && !error && (
-              <p>No assignments with attached PDFs found in this classroom.</p>
+              <p className="text-gray-600">No assignments with attached PDFs found in this classroom.</p>
             ))}
           </div>
         )}
@@ -244,7 +244,7 @@ const RagChat = () => {
               onClick={processPdfsForRag}
               disabled={mlLoading || loading}
               className={
-                `bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${(mlLoading || loading) && 'opacity-50 cursor-not-allowed'}`
+                `bg-teal-700 hover:bg-teal-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${(mlLoading || loading) && 'opacity-50 cursor-not-allowed'}`
               }
             >
               {mlLoading ? 'Processing PDFs...' : 'Process Selected PDFs for RAG'}
@@ -259,8 +259,8 @@ const RagChat = () => {
       </div>
 
       {/* Main Chat Panel */}
-      <div className="lg:w-3/4 w-full bg-gray-100 p-4 rounded-lg shadow-md flex flex-col h-[calc(100vh-150px)] overflow-hidden">
-        <h3 className="text-xl font-semibold mb-4">Chat with RAG</h3>
+      <div className="lg:w-3/4 w-full bg-mint-cream p-4 rounded-lg shadow-md flex flex-col h-[calc(100vh-150px)] overflow-hidden">
+        <h3 className="text-xl font-semibold mb-4 text-teal-700">Chat with AI</h3>
 
         {/* Chat Display */}
         <div className="flex-grow overflow-y-auto mb-4 pr-2">
@@ -268,7 +268,7 @@ const RagChat = () => {
             <div key={index} className={`mb-2 ${message.type === 'user' ? 'text-right' : 'text-left'}`}>
               <span
                 className={
-                  `inline-block p-2 rounded-lg ${message.type === 'user' ? 'bg-blue-500 text-white' : message.type === 'rag' ? 'bg-green-300 text-gray-800' : 'bg-gray-300 text-gray-800'}`
+                  `inline-block p-2 rounded-lg ${message.type === 'user' ? 'bg-teal-600 text-white' : message.type === 'rag' ? 'bg-teal-200 text-gray-800' : 'bg-gray-300 text-gray-800'}`
                 }
               >
                 {message.text}
@@ -293,7 +293,7 @@ const RagChat = () => {
               type="submit"
               disabled={loading || mlLoading || !question.trim()}
               className={
-                `bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-r focus:outline-none focus:shadow-outline ${ (loading || mlLoading || !question.trim()) && 'opacity-50 cursor-not-allowed'}`
+                `bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-r focus:outline-none focus:shadow-outline ${ (loading || mlLoading || !question.trim()) && 'opacity-50 cursor-not-allowed'}`
               }
             >
               Ask

@@ -82,7 +82,9 @@ const Navbar = () => {
             {isAuthenticated && user?.email ? ( // Check isAuthenticated and if user object exists and has name
               <div className="flex items-center space-x-4">
                 {/* <span className="text-gray-300"></span> */}
+                 <Link to="/ragchat" className="text-gray-300 hover:text-teal-600">AI Learn</Link>
           <Link to="/profile" className="text-gray-300 hover:text-teal-600">{user.username}</Link> {/* Assuming a /contact route */}
+
 
                  <button
                     onClick={handleLogout}
