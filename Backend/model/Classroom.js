@@ -11,6 +11,43 @@ const generateCode = (length = 6) => {
   return result;
 };
 
+// Schema for individual assignments
+const assignmentSchema = new mongoose.Schema({
+  uploader: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  title: {
+    type: String,
+    required: [true, 'Assignment title is required.'],
+    trim: true,
+  },
+  description: {
+    type: String,
+    trim: true,
+  },
+  originalFileName: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  storagePath: { // Store the Cloudinary URL
+    type: String,
+    required: true,
+  },
+  cloudinaryPublicId: { // Store Cloudinary public ID for potential deletion
+    type: String,
+    required: true,
+  },
+  fileType: {
+    type: String,
+    required: true,
+  },
+}, {
+  timestamps: true, // Adds createdAt and updatedAt for assignments
+});
+
 const classroomSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -38,9 +75,9 @@ const classroomSchema = new mongoose.Schema({
     unique: true,
     default: () => generateCode(8), // Auto-generate an 8-character code
   },
-  // We will add assignments later
+  assignments: [assignmentSchema], // Array of assignment sub-documents
 }, {
-  timestamps: true, // Adds createdAt and updatedAt automatically
+  timestamps: true, // Adds createdAt and updatedAt automatically for the classroom
 });
 
 // Optional: Add an index on joinCode for faster lookups
