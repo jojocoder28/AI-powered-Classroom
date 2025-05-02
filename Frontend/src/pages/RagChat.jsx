@@ -24,6 +24,7 @@ const RagChat = () => {
         setClassroomsLoading(true);
         try {
           // Assuming this endpoint exists and returns enrolled classrooms
+          // Updated endpoint based on typical routes
           const response = await axios.get(`${backend_api}/api/classrooms/myclassrooms`, {
             withCredentials: true,
           });
@@ -53,13 +54,13 @@ const RagChat = () => {
         setLoading(true);
         setError('');
         try {
-          // Assuming assignments are fetched from /api/v1/classroom/:id/assignments
+          // Assuming assignments are fetched from /api/classrooms/:id/assignments
           const response = await axios.get(`${backend_api}/api/classrooms/${selectedClassroomId}/assignments`, {
             withCredentials: true,
           });
           // Assuming assignments are in response.data.classroom.assignments
-          // And each assignment has a submissionFile object with a url
-          setAssignments(response.data.classroom.assignments || []);
+          // And each assignment has a storagePath and fileType based on the schema
+          setAssignments(response.data.assignments || []);
         } catch (err) {
           console.error('Error fetching assignments:', err);
           setError('Failed to fetch assignments.');
@@ -101,7 +102,7 @@ const RagChat = () => {
     setChatHistory([]); // Clear chat history on reprocessing
 
     // Replace with the actual URL of your ML backend
-    const mlBackendUrl = 'http://localhost:5000'; // Or your deployed ML backend URL
+    const mlBackendUrl = 'http://localhost:5000'; // Or your deployed ML backend URL (corrected port)
 
     try {
       const response = await axios.post(`${mlBackendUrl}/process_assignment_pdfs`, {
@@ -140,7 +141,7 @@ const RagChat = () => {
     setLoading(true);
     setError('');
 
-    const mlBackendUrl = 'http://localhost:5000'; // Or your deployed ML backend URL
+    const mlBackendUrl = 'http://localhost:5000'; // Or your deployed ML backend URL (corrected port)
 
     try {
       const response = await axios.post(`${mlBackendUrl}/ask`, {
@@ -166,6 +167,11 @@ const RagChat = () => {
   if (!isAuthenticated) {
     return <div className="container mx-auto p-4 text-center text-red-600">Please log in to access the RAG Chat.</div>;
   }
+
+  // Filter assignments to only include those with a PDF file
+  const pdfAssignments = assignments.filter(assignment =>
+    assignment.storagePath && assignment.fileType === 'application/pdf'
+  );
 
   return (
     <div className="container mx-auto p-4 flex flex-col lg:flex-row">
@@ -209,26 +215,23 @@ const RagChat = () => {
               <p>Loading assignments...</p>
             ) : error && selectedClassroomId && !mlLoading ? ( // Show assignment specific error
               <p className="text-red-500">{error}</p>
-            ) : assignments.length > 0 ? (
+            ) : pdfAssignments.length > 0 ? (
               <div>
                  <p className="text-gray-700 text-sm mb-2">Select PDFs to include in RAG:</p>
                  <ul>
-                  {assignments.map(assignment => (
-                     // Assuming assignment object has a 'submissionFile' object with a 'url'
-                    assignment.submissionFile?.url && (
-                      <li key={assignment._id} className="mb-1">
-                        <label className="inline-flex items-center">
-                          <input
-                            type="checkbox"
-                            className="form-checkbox"
-                            value={assignment.submissionFile.url}
-                            checked={selectedPdfUrls.includes(assignment.submissionFile.url)}
-                            onChange={() => handlePdfSelect(assignment.submissionFile.url)}
-                          />
-                          <span className="ml-2 text-gray-700">{assignment.title}</span>
-                        </label>
-                      </li>
-                    )
+                  {pdfAssignments.map(assignment => (
+                    <li key={assignment._id} className="mb-1">
+                      <label className="inline-flex items-center">
+                        <input
+                          type="checkbox"
+                          className="form-checkbox"
+                          value={assignment.storagePath} // Use storagePath for the value
+                          checked={selectedPdfUrls.includes(assignment.storagePath)} // Check against storagePath
+                          onChange={() => handlePdfSelect(assignment.storagePath)} // Pass storagePath to handler
+                        />
+                        <span className="ml-2 text-gray-700">{assignment.title}</span>
+                      </label>
+                    </li>
                   ))}
                 </ul>
               </div>
