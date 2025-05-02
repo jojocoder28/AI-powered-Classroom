@@ -22,6 +22,7 @@ function Profile() {
 
   useEffect(() => {
     const fetchProfile = async () => {
+<<<<<<< HEAD
       setLoading(true);
       setError('');
       setMessage('');
@@ -31,6 +32,17 @@ function Profile() {
       setFormData({});
       setProfile(null);
 
+=======
+      setLoading(true); // Start loading
+      setError(''); // Clear previous errors
+      setMessage(''); // Clear previous messages
+      setEditMode(false); // Exit edit mode when fetching a new profile
+      setPreviewImage(null); // Clear preview image
+      setImageFile(null); // Clear image file
+      setFormData({}); // Clear form data
+      setProfile(null); // Clear previous profile data
+      console.log(userId);
+>>>>>>> ccbcbfafc9111c2884cd03c1178e257f77520e81
       try {
         let url;
         if (userId) {

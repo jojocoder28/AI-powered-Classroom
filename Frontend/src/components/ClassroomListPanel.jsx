@@ -14,29 +14,35 @@ const ClassroomListPanel = ({
 }) => {
   return (
     <div className="w-1/3 border-r border-gray-200 dark:border-gray-700 p-4 flex flex-col bg-white dark:bg-gray-800">
-      <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">Classrooms</h2>
+      <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">Live Class</h2>
 
       {/* Action Buttons - Only show if authenticated */}
       {isAuthenticated && (
         <div className="mb-4 flex space-x-2">
-          <button
+          {
+            user?.role === 'Teacher' ?(
+              <button
             onClick={handleCreateClassroom}
             className="flex-1 bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 text-sm disabled:opacity-50"
             // Disable if not a teacher (adjust role check as needed)
-            disabled={user?.role !== 'Teacher'}
-            title={user?.role !== 'Teacher' ? "Only teachers can create classrooms" : ""}
+            //disabled={user?.role !== 'Teacher'}
+            //title={user?.role !== 'Teacher' ? "Only teachers can create classrooms" : ""}
           >
-            Create New
+          Create
           </button>
-          <button
-            onClick={handleJoinClassroom}
-            className="flex-1 bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 text-sm disabled:opacity-50"
-            // Disable if not a student (adjust role check as needed)
-            disabled={user?.role !== 'Student'}
-            title={user?.role !== 'Student' ? "Only students can join classrooms" : ""}
-          >
-            Join Existing
-          </button>
+            ):(
+              <button
+              onClick={handleJoinClassroom}
+              className="flex-1 bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 text-sm disabled:opacity-50"
+              // Disable if not a student (adjust role check as needed)
+              // disabled={user?.role !== 'Student'}
+              // title={user?.role !== 'Student' ? "Only students can join classrooms" : ""}
+            >
+              Join
+            </button>
+
+          )  }
+          
         </div>
       )}
 
