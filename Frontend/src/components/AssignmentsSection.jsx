@@ -133,114 +133,123 @@ const AssignmentsSection = ({ classroomId }) => {
   }
 
   return (
-    <div className="border rounded p-4 my-4">
-      <h3 className="text-lg font-semibold mb-2">Assignments / Files</h3>
-       {isLoading && <p>Loading assignments...</p>}
-       {error && <p className="text-red-600">Error: {error}</p>}
+    <div className="border rounded-lg p-6 my-6 bg-white dark:bg-gray-800 shadow-lg">
+  <h3 className="text-xl font-bold mb-4 text-purple-700 dark:text-purple-300">Assignments / Files</h3>
 
-      {!isLoading && !error && (
-          <>
+  {isLoading && <p className="text-gray-600 dark:text-gray-300">Loading assignments...</p>}
+  {error && <p className="text-red-600">Error: {error}</p>}
+
+  {!isLoading && !error && (
+    <>
+      {/* Uploaded Files Section */}
+      <div className="mb-6">
+        <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Uploaded Files</h4>
+        {assignments.length > 0 ? (
+          <ul className="space-y-3">
+            {assignments.map(assign => (
+              <li
+                key={assign._id || assign.cloudinaryPublicId || Math.random()}
+                className="flex items-center bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
+              >
+                <span className="text-red-600 mr-3 text-xl"></span>
+                <a
+                  href={assign.storagePath || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline font-medium"
+                >
+                  {assign.title || assign.originalFileName || 'Untitled File'}
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-500 italic">No files uploaded yet.</p>
+        )}
+      </div>
+
+      {/* Upload Section for Teachers */}
+      {user?.role === 'Teacher' && (
+        <div className="mt-6">
+          {!showUploadForm ? (
+            <button
+              onClick={() => setShowUploadForm(true)}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-md shadow transition"
+            >
+              Upload New Assignment
+            </button>
+          ) : (
+            <form
+              onSubmit={handleUpload}
+              className="border p-6 mt-4 rounded-lg bg-gray-50 dark:bg-gray-700 shadow"
+            >
+              <h4 className="text-lg font-semibold mb-4 text-gray-700 dark:text-white">Upload Assignment File</h4>
+
               <div className="mb-4">
-                  <h4 className="font-medium mb-1">Uploaded Files:</h4>
-                  {assignments.length > 0 ? (
-                      <ul className="list-disc pl-5 space-y-1">
-                          {assignments.map(assign => (
-                              // Ensure assign._id is unique and stable for keys
-                              <li key={assign._id || assign.cloudinaryPublicId || Math.random()}> 
-                                  {/* Use storagePath from backend response */} 
-                                  <a href={assign.storagePath || '#'} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{assign.title || assign.originalFileName || 'Untitled File'}</a>
-                                  {/* Optional: Add uploader info or date */}
-                                  {/* <span className="text-xs text-gray-500 ml-2">({new Date(assign.createdAt).toLocaleDateString()})</span> */}
-                              </li>
-                          ))}
-                      </ul>
-                  ) : (
-                      <p className="text-gray-500 italic">No files uploaded yet.</p>
-                  )}
+                <label htmlFor="assignment-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+                <input
+                  type="text"
+                  id="assignment-upload-input"
+                  value={title}
+                  onChange={handleTitleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 focus:border-purple-500 focus:ring-purple-500 sm:text-sm p-2 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                  required
+                />
               </div>
 
-              {/* Only show upload section to teachers, or based on specific permissions */}
-              {user?.role === 'Teacher' && (
-                <div className="mt-4">
-                  {!showUploadForm ? (
-                    <button
-                      onClick={() => setShowUploadForm(true)}
-                      className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
-                    >
-                      Upload New Assignment
-                    </button>
-                  ) : (
-                    <form onSubmit={handleUpload} className="border p-4 rounded">
-                      <h4 className="font-medium mb-3">Upload Assignment File:</h4>
-                      
-                      <div className="mb-3">
-                          <label htmlFor="assignment-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Title:</label>
-                          <input
-                              type="text"
-                              id="assignment-upload-input"
-                              value={title}
-                              onChange={handleTitleChange}
-                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                              required
-                          />
-                      </div>
+              <div className="mb-4">
+                <label htmlFor="assignment-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description (Optional)</label>
+                <textarea
+                  id="assignment-description"
+                  value={description}
+                  onChange={handleDescriptionChange}
+                  rows="3"
+                  className="mt-1 block w-full rounded-md border-gray-300 focus:border-purple-500 focus:ring-purple-500 sm:text-sm p-2 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                />
+              </div>
 
-                       <div className="mb-3">
-                          <label htmlFor="assignment-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description (Optional):</label>
-                          <textarea
-                              id="assignment-description"
-                              value={description}
-                              onChange={handleDescriptionChange}
-                              rows="3"
-                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                          ></textarea>
-                      </div>
+              <div className="mb-4">
+                <label htmlFor="assignment-file" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Select File</label>
+                <input
+                  id="assignment-file"
+                  type="file"
+                  onChange={handleFileChange}
+                  className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white dark:bg-gray-600 dark:border-gray-500 dark:text-white p-2"
+                  required
+                />
+              </div>
 
-                      <div className="mb-3">
-                           <label htmlFor="assignment-file" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Select File:</label>
-                          <input
-                              id="assignment-file"
-                              type="file"
-                              onChange={handleFileChange}
-                              className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none p-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                              required
-                          />
-                      </div>
-                      
-                      <div className="flex space-x-2">
-                          <button
-                              type="submit"
-                              disabled={!file || !title || isUploading} // Disable if no file, no title, or uploading
-                              className={
-                                  `flex-1 justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed`
-                              }
-                          >
-                              {isUploading ? 'Uploading...' : 'Upload'}
-                          </button>
-                           <button
-                            type="button"
-                            onClick={() => setShowUploadForm(false)}
-                            className="flex-1 justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-600 dark:text-white dark:border-gray-500 dark:hover:bg-gray-500"
-                          >
-                            Cancel
-                          </button>
-                      </div>
-
-                    </form>
-                  )}
-                </div>
-              )}
-
-               {/* Students might see a different input for *submitting* assignments */}
-              {user?.role === 'Student' && (
-                  <div className="mt-4">
-                       {/* TODO: Add submission form/button if needed */}
-                      <p className="text-sm text-gray-600 italic dark:text-gray-400">(Students: Submit assignments via the specific assignment link or portal)</p>
-                  </div>
-              )}
-          </>
+              <div className="flex gap-3 mt-4">
+                <button
+                  type="submit"
+                  disabled={!file || !title || isUploading}
+                  className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-5 rounded shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isUploading ? 'Uploading...' : 'Upload'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowUploadForm(false)}
+                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-600 dark:text-white py-2 px-5 rounded shadow"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       )}
-    </div>
+
+      {/* Student Submission Info */}
+      {user?.role === 'Student' && (
+        <div className="mt-6 text-sm text-gray-600 italic dark:text-gray-400">
+          Students: Submit assignments via the specific assignment link or portal.
+        </div>
+      )}
+    </>
+  )}
+</div>
+
   );
 };
 

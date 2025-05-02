@@ -13,7 +13,7 @@ const ClassroomListPanel = ({
   user
 }) => {
   return (
-    <div className="w-1/3 border-r border-gray-200 dark:border-gray-700 p-4 flex flex-col bg-white dark:bg-gray-800">
+    <div className="border-r border-gray-200 dark:border-gray-700 p-4 flex flex-col bg-white dark:bg-gray-800">
       <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">Live Class</h2>
 
       {/* Action Buttons - Only show if authenticated */}
@@ -47,7 +47,7 @@ const ClassroomListPanel = ({
       )}
 
       {/* Classroom List */}
-      <div className="flex-grow overflow-y-auto border-t border-gray-200 dark:border-gray-700 pt-2">
+      <div className="flex-grow overflow-y-auto border-t border-white-200 dark:border-gray-700 pt-2">
         {isLoading && <p>Loading list...</p>}
         {error && <p className="text-red-600">Error: {error}</p>}
         {!isLoading && !error && classrooms.length > 0 ? (
@@ -65,7 +65,7 @@ const ClassroomListPanel = ({
             }
           </ul>
         ) : (
-          !isLoading && !error && <p className="text-gray-500 dark:text-gray-400 italic">No classrooms found. Create or join one!</p>
+          !isLoading && !error && <p className="text-gray-500 dark:text-gray-400 italic"></p>
         )}
       </div>
     </div>
