@@ -7,6 +7,7 @@ import { backend_api } from '../config';
 import ClassroomListPanel from '../components/ClassroomListPanel';
 import ClassroomDetailsPanel from '../components/ClassroomDetailsPanel';
 import ParticipantsSection from '../components/ParticipantsSection'; // Import the ParticipantsSection
+import VideoPage from '../components/VideoPage';
 
 // --- Main Classroom Page Component ---
 
@@ -120,7 +121,7 @@ function Classroom() {
         isAuthenticated={isAuthenticated}
         user={user}
       />
-      <ClassroomDetailsPanel selectedClassroom={selectedClassroom} />
+      <VideoPage roomId={roomId} />
       {/* Add ParticipantsSection */}
       <ParticipantsSection classroomId={roomId} />
     </div>

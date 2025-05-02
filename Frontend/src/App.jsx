@@ -14,7 +14,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Classroom = lazy(() => import('./pages/Classroom'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Settings = lazy(() => import('./pages/Settings'));
-const VideoPage = lazy(() => import('./components/VideoPage')); // Lazy load VideoPage
+// const VideoPage = lazy(() => import('./components/VideoPage')); // Lazy load VideoPage
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -58,10 +58,10 @@ function AppContent() {
               path="/classroom/:roomId"
               element={<ProtectedRoute><Classroom /></ProtectedRoute>}
             />
-             <Route
+             {/* <Route
               path="/classroom/:roomId/video"
               element={<ProtectedRoute><VideoPage /></ProtectedRoute>}
-            />
+            /> */}
              <Route
               path="/profile"
               element={<ProtectedRoute><Profile /></ProtectedRoute>}

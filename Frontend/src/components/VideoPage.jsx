@@ -2,8 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 
-const VideoPage = () => {
-  const { roomId } = useParams();
+const VideoPage = (ref) => {
+  const roomId = ref.roomId;
   const containerRef = useRef(null);
   const roomID = roomId;
 
@@ -76,7 +76,7 @@ const VideoPage = () => {
     return () => clearInterval(captureInterval);
   }, [roomID]);
 
-  return <div ref={containerRef} style={{ width: '100%', height: '100vh' }} />;
+  return <div ref={containerRef} style={{ zIndex:100, width: '100%', height: '100vh' }} />;
 };
 
 export default VideoPage;
