@@ -15,6 +15,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Classroom = lazy(() => import('./pages/Classroom'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Settings = lazy(() => import('./pages/Settings'));
+// const VideoPage = lazy(() => import('./components/VideoPage')); // Lazy load VideoPage
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -90,6 +91,54 @@ function AppContent() {
 
       {/* Render footer only on pages without sidebar, or handle within specific page components */}
        {!needsSidebar && <CopyrightElement name='Vidyana' link="/" />} {/* Add CopyrightElement */}
+      <main className="flex-grow">
+        <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading Page...</div>}>
+          <Routes>
+            {/* Public Routes */}
+            {isAuthenticated ? (
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            ) : (
+            <Route path="/" element={<Home />} />
+            )}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            {/* Add other public routes like /features, /contact if needed */}
+             <Route path="/features" element={<div>Features Page Placeholder</div>} />
+             <Route path="/contact" element={<div>Contact Page Placeholder</div>} />
+
+            {/* Protected Routes */}
+            <Route
+              path="/dashboard"
+              element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+            />
+            <Route
+              path="/classroom/:roomId"
+              element={<ProtectedRoute><Classroom /></ProtectedRoute>}
+            />
+             {/* <Route
+              path="/classroom/:roomId/video"
+              element={<ProtectedRoute><VideoPage /></ProtectedRoute>}
+            /> */}
+             <Route
+              path="/profile"
+              element={<ProtectedRoute><Profile /></ProtectedRoute>}
+            />
+            <Route
+              path="/profile/:userId"
+              element={<ProtectedRoute><Profile /></ProtectedRoute>}
+            />
+            <Route
+              path="/settings"
+              element={<ProtectedRoute><Settings /></ProtectedRoute>}
+            />
+
+            {/* Redirect any unknown paths to home or a 404 page */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </main>
+      <Footer /> {/* Add Footer component */}
+      <CopyrightElement name='Vidyana' link="/" /> {/* Add CopyrightElement */}
     </div>
   );
 }

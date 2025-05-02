@@ -1,14 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
-import { backend_api, appID, serverSecret } from '../config'; // Adjust the import based on your project structure
-const VideoPage = () => {
-  const { id } = useParams();
+
+const VideoPage = (ref) => {
+  const roomId = ref.roomId;
   const containerRef = useRef(null);
-  const roomID = id;
+  const roomID = roomId;
 
   useEffect(() => {
-
+    const appID = 1097934302;
+    const serverSecret = "be54dd9f65284705e25a9f2907b977ec";
     const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
       appID,
       serverSecret,
@@ -75,7 +76,7 @@ const VideoPage = () => {
     return () => clearInterval(captureInterval);
   }, [roomID]);
 
-  return <div ref={containerRef} style={{ width: '100%', height: '100vh' }} />;
+  return <div ref={containerRef} style={{ zIndex:100, width: '100%', height: '100vh' }} />;
 };
 
 export default VideoPage;

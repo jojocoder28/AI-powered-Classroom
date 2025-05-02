@@ -264,6 +264,9 @@ const uploadAssignment = asyncHandler(async (req, res, next) => {
     };
 
     try {
+        if (!classroom.assignments) {
+            classroom.assignments = []; // Initialize if not present
+        }
         classroom.assignments.push(newAssignment);
         await classroom.save();
         const savedAssignment = classroom.assignments[classroom.assignments.length - 1];

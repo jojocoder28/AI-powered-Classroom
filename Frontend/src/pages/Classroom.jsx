@@ -62,12 +62,12 @@ function Classroom() {
   const handleCreateClassroom = () => {
     // TODO: Use a modal form instead of prompt
     // TODO: Implement API call to create classroom using token from context/cookie
-    const newName = prompt('Enter new classroom name:');
+    const newName = roomId
     if (newName && isAuthenticated) {
       console.log(`Creating classroom: ${newName}`);
       // Placeholder: API call
       // On success: refetch classrooms or add to state
-      const newClassroom = { _id: Date.now().toString(), name: newName, description: 'Newly created (Simulated)' }; // Use _id for consistency
+      const newClassroom = { _id:roomId, name: newName, description: 'Newly created (Simulated)' }; // Use _id for consistency
       setClassrooms([...classrooms, newClassroom]);
       setSelectedClassroom(newClassroom);
     } else if (!isAuthenticated) {
@@ -78,11 +78,16 @@ function Classroom() {
   const handleJoinClassroom = () => {
     // TODO: Use a modal form
     // TODO: Implement API call to join classroom using token
-    const joinCode = prompt('Enter classroom code to join:');
-    if (joinCode && isAuthenticated) {
-      console.log(`Attempting to join classroom with code: ${joinCode}`);
+    // const joinCode = prompt('Enter classroom code to join:');
+    if (roomId && isAuthenticated) {
+      console.log(`Attempting to join classroom with code: ${roomId}`);
       // Placeholder: API call
-      alert('Join functionality needs backend implementation.');
+      // alert('Join functionality needs backend implementation.');
+      // Navigate to video page after attempting to join
+      const newClassroom = { _id:roomId, name: roomId, description: 'Chop' }; // Use _id for consistency
+
+      setSelectedClassroom(newClassroom);
+      navigate(`/classroom/${roomId}`);
     } else if (!isAuthenticated) {
         alert("Please log in to join a classroom.");
     }

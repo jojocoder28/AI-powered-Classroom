@@ -3,6 +3,7 @@ import ParticipantsSection from '../components/ParticipantsSection';
 import VideoCallSection from './VideoCallSection'; // Assuming these will be in the same components folder
 import AssignmentsSection from './AssignmentsSection';
 import ChatSection from './ChatSection';
+import VideoPage from './VideoPage';
 
 const ClassroomDetailsPanel = ({
   selectedClassroom,
@@ -16,7 +17,7 @@ const ClassroomDetailsPanel = ({
 
           {/* Sections that depend on the selected classroom ID */}
           <ParticipantsSection classroomId={selectedClassroom._id} />
-          <VideoCallSection classroom={selectedClassroom} />
+          <VideoPage roomId={selectedClassroom._id} />
           <AssignmentsSection classroomId={selectedClassroom._id} />
           {/* Chat might be independent or tied to the classroom */}
           <ChatSection classroomId={selectedClassroom._id} />
@@ -24,6 +25,7 @@ const ClassroomDetailsPanel = ({
         </div>
       ) : (
         <div className="flex items-center justify-center h-full">
+
            <p className="text-gray-500 dark:text-gray-400 text-lg">Select a classroom from the list to view details.</p>
         </div>
       )}
