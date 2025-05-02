@@ -119,7 +119,7 @@ function Register() {
           <InputField label="University" name="university" value={formData.university} onChange={handleChange} required />
           <InputField label="Department" name="department" value={formData.department} onChange={handleChange} required />
           <InputField label="Designation" name="designation" value={formData.designation} onChange={handleChange} required />
-          </>
+          </div>
         );
       case 'Admin':
         return (
@@ -144,7 +144,7 @@ function Register() {
           </div>
         </div>
         <h2 className="mt-6 text-center text-2xl font-extrabold text-teal-800 dark:text-mint-cream">
-          Join Our Community
+          Create An Accont
         </h2>
       </div>
         {error && (
