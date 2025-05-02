@@ -202,7 +202,7 @@ const RagChat = () => {
 
     try {
       // Assuming a new endpoint /generate_quiz that accepts file_paths
-      const response = await axios.post(`${mlBackendUrl}/generate_quiz`, {
+      const response = await axios.get(`${mlBackendUrl}/quiz-generate`, {
          file_paths: selectedPdfUrls,
       });
 
@@ -227,7 +227,7 @@ const RagChat = () => {
 
     } catch (err) {
       console.error('Error generating quiz:', err);
-      setError('Failed to generate quiz. Make sure the ML backend is running and the /generate_quiz endpoint is available.');
+      setError('Failed to generate quiz.');
       setCurrentView('chat'); // Go back to chat view on API error
     } finally {
       setQuizLoading(false);
@@ -417,7 +417,7 @@ return (
                    value={question}
                    onChange={(e) => setQuestion(e.target.value)}
                    placeholder="Ask your deeply philosophical (or silly) question..."
-                   className="flex-grow border border-gray-300 rounded-l-lg py-3 px-4 text-gray-800 focus:outline-none focus:border-teal-500"
+                   className="flex-grow border border-gray-300 rounded-l-lg py-3 px-4 text-gray-100 focus:outline-none focus:border-teal-500"
                    disabled={loading || mlLoading || quizLoading}
                  />
                  <button
