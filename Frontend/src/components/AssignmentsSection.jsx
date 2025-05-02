@@ -24,23 +24,10 @@ const AssignmentsSection = ({ classroomId }) => {
       console.log(`Assignments: Fetching for classroom ${classroomId}`);
       try {
          // --- Get token from cookie ---
-         const nameEQ = "token=";
-         const ca = document.cookie.split(';');
-         let token = null;
-         for(let i=0; i < ca.length; i++) {
-             let c = ca[i];
-             while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-             if (c.indexOf(nameEQ) === 0) {
-                 token = c.substring(nameEQ.length, c.length);
-                 break;
-             }
-         }
-         if (!token) throw new Error("Authentication required.");
-
+        
          // --- Actual API Call ---
         // Replace with your actual endpoint to fetch assignments
-        const response = await axios.get(`${backend_api}/api/v1/classroom/${classroomId}/assignments`, { // Example endpoint
-          headers: { 'Authorization': `Bearer ${token}` },
+        const response = await axios.get(`${backend_api}/api/classrooms/${classroomId}/assignments`, { // Example endpoint
           withCredentials: true,
         });
 
@@ -98,9 +85,8 @@ const AssignmentsSection = ({ classroomId }) => {
     try {
         // --- Actual API Call ---
        // Replace with your actual endpoint to upload assignments
-      const response = await axios.post(`${backend_api}/api/v1/classroom/${classroomId}/assignments`, formData, {
+      const response = await axios.post(`${backend_api}/api/classrooms/${classroomId}/assignments`, formData, {
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data', // Important for file uploads
         },
         withCredentials: true,
