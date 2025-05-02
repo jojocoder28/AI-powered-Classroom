@@ -83,6 +83,8 @@ function Classroom() {
       console.log(`Attempting to join classroom with code: ${joinCode}`);
       // Placeholder: API call
       alert('Join functionality needs backend implementation.');
+      // Navigate to video page after attempting to join
+      navigate(`/classroom/${roomId}/video`);
     } else if (!isAuthenticated) {
         alert("Please log in to join a classroom.");
     }
