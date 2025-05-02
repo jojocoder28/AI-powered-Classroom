@@ -144,7 +144,7 @@ function Register() {
                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
             </div>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-teal-800 dark:text-mint-cream">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-teal-200 dark:text-mint-cream">
             Create Your Account
           </h2>
            <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">

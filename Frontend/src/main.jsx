@@ -2,8 +2,8 @@ import React, { createContext, useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import './index.css';
-import axios from 'axios'; // Import axios
-import { backend_api } from './config'; // Import backend_api
+import axios from 'axios';
+import { backend_api } from './config';
 
 export const Context = createContext({
   isAuthenticated: false,
@@ -12,45 +12,49 @@ export const Context = createContext({
 const AppWrapper = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState({});
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
-      const nameEQ = "token=";
-      const ca = document.cookie.split(';');
-      let token = null;
-      for(let i=0;i < ca.length;i++) {
-          let c = ca[i];
-          while (c.charAt(0)===' ') c = c.substring(1,c.length);
-          if (c.indexOf(nameEQ) === 0) {
-              token = c.substring(nameEQ.length,c.length);
-              break;
-          }
+      const cookies = document.cookie.split(';');
+      let adminToken = null;
+      let userToken = null;
+
+      for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i].trim();
+        if (cookie.startsWith('adminToken=')) {
+          adminToken = cookie.substring('adminToken='.length, cookie.length);
+        } else if (cookie.startsWith('userToken=')) {
+          userToken = cookie.substring('userToken='.length, cookie.length);
+        }
       }
+
+      const token = adminToken || userToken; // Use either token if found
 
       if (token) {
         try {
-          // Verify token with backend and fetch user details
-          const response = await axios.get(`${backend_api}/api/users/details`, { // Assuming you have a /me endpoint
+          const response = await axios.get(`${backend_api}/api/users/details`, {
             headers: {
               Authorization: `Bearer ${token}`
             },
-            withCredentials: true, // If your backend uses cookies for session management alongside token
+            withCredentials: true,
           });
 
           if (response.data.success) {
             setIsAuthenticated(true);
             setUser(response.data.user);
           } else {
-            // Token invalid or user not found, clear cookie
-            document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            // Token invalid or user not found, clear cookies
+            document.cookie = 'adminToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            document.cookie = 'userToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
             setIsAuthenticated(false);
             setUser({});
           }
         } catch (error) {
           console.error("Error verifying token:", error);
           // Handle error (e.g., token expired, invalid)
-          document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          document.cookie = 'adminToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          document.cookie = 'userToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
           setIsAuthenticated(false);
           setUser({});
         }
@@ -58,11 +62,11 @@ const AppWrapper = () => {
         setIsAuthenticated(false);
         setUser({});
       }
-      setLoading(false); // Set loading to false after check
+      setLoading(false);
     };
 
     checkAuth();
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
 
   return (
     <Context.Provider
@@ -71,7 +75,7 @@ const AppWrapper = () => {
         setIsAuthenticated,
         user,
         setUser,
-        loading // Provide loading state
+        loading
       }}
     >
       <App />
