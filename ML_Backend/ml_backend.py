@@ -134,7 +134,7 @@ def process_assignment_pdfs():
     question_answer_chain = create_stuff_documents_chain(llm, prompt)
     rag_chain = create_retrieval_chain(retriever, question_answer_chain)
 
-    return jsonify({"message": "PDFs from URLs processed and RAG built successfully."})
+    return jsonify({"message": "Hi learner, I'am Vidyana your own learning AI."})
 
 
 @app.route('/ask', methods=['POST'])
