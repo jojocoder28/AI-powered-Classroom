@@ -1,0 +1,16 @@
+Flask
+opencv-python
+ultralytics
+numpy
+pillow
+python-dotenv
+PyMuPDF
+langchain
+langchain-community
+langchain-google-genai
+langchain-core
+langchain-chroma
+chromadb
+tiktoken
+fastapi
+uvicorn
