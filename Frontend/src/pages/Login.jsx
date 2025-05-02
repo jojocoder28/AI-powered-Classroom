@@ -48,35 +48,30 @@ function Login() {
   if (isAuthenticated) return <Navigate to="/" />;
 
   return (
-    <div className="min-h-screen bg-mint-cream dark:bg-gray-900 flex items-center justify-center py-12 px-4">
-      <div className="flex flex-col md:flex-row w-full max-w-4xl bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden transition duration-500 ease-in-out transform hover:-translate-y-1 hover:shadow-2xl">
-        {/* Left Section with Animation */}
-        <div className="w-full md:w-1/2 bg-gradient-to-br from-teal-400 to-blue-500 dark:from-teal-600 dark:to-blue-700 p-8 relative overflow-hidden flex items-center justify-center">
-          {/* Animated Blobs */}
-          <div className="absolute w-72 h-72 bg-teal-300 dark:bg-teal-600 rounded-full filter blur-2xl opacity-50 animate-blob top-0 left-0"></div>
-          <div className="absolute w-72 h-72 bg-blue-300 dark:bg-blue-600 rounded-full filter blur-2xl opacity-50 animate-blob animation-delay-2000 top-10 right-0"></div>
-          <div className="absolute w-72 h-72 bg-mint-cream dark:bg-gray-700 rounded-full filter blur-2xl opacity-40 animate-blob animation-delay-4000 bottom-10 left-0"></div>
-          <div className="absolute w-72 h-72 bg-teal-500 dark:bg-teal-800 rounded-full filter blur-2xl opacity-40 animate-blob animation-delay-6000 bottom-0 right-0"></div>
-
-          <div className="relative z-10 text-center text-white">
-            <h2 className="text-4xl font-bold mb-4 drop-shadow-lg">Welcome Back!</h2>
-            <p className="text-md font-light">Login to access your dashboard</p>
+    <div className="min-h-screen bg-mint-cream dark:bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col md:flex-row w-full max-w-3xl bg-white dark:bg-gray-700 rounded-2xl shadow-2xl overflow-hidden border border-teal-100 dark:border-teal-800">
+        {/* Left Section - Simple Color */}
+        {/* Blobs removed as requested in a previous step */}
+        <div className="w-full md:w-1/2 bg-teal-500 dark:bg-teal-700 p-8 flex items-center justify-center text-white">
+          <div className="relative z-10 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 drop-shadow-lg">Welcome Back!</h2>
+            <p className="text-md font-light">Login to access your dashboard and continue your learning journey.</p>
           </div>
         </div>
 
-        {/* Right Section - Login Form */}
+        {/* Right Section - Login Form (Fields Left Aligned) */}
         <div className="w-full md:w-1/2 p-10 space-y-6 flex flex-col justify-center">
-          <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white">Login</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-center text-teal-800 dark:text-mint-cream">Sign In</h2>
 
           {error && (
-            <div className="bg-red-100 dark:bg-red-600 text-red-800 dark:text-white px-4 py-3 rounded text-sm">
-              <strong>Error: </strong>{error}
+            <div className="bg-red-100 dark:bg-red-700 text-red-800 dark:text-red-200 px-4 py-3 rounded text-sm border border-red-200 dark:border-red-600" role="alert">
+              <strong className="font-bold">Error: </strong>{error}
             </div>
           )}
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form className="space-y-6 text-left" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left">Email address</label>
               <input
                 id="email"
                 name="email"
@@ -85,13 +80,14 @@ function Login() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-white bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm bg-mint-cream dark:bg-gray-800 text-left"
+                placeholder="Email address"
                 disabled={loading}
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left">Password</label>
               <input
                 id="password"
                 name="password"
@@ -100,36 +96,43 @@ function Login() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-white bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm bg-mint-cream dark:bg-gray-800 text-left"
+                placeholder="Password"
                 disabled={loading}
               />
             </div>
 
             <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center">
+              <div className="flex items-center">
                 <input
+                  id="remember-me"
+                  name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-teal-600 dark:text-teal-400 focus:ring-teal-500 rounded"
+                  className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded dark:text-teal-500 dark:focus:ring-teal-600 dark:border-gray-600 bg-mint-cream dark:bg-gray-800"
                 />
-                <span className="ml-2 text-gray-700 dark:text-gray-300">Remember me</span>
-              </label>
-              <Link to="#" className="text-teal-500 hover:underline dark:text-teal-300">Forgot Password?</Link>
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300 text-left">
+                  Remember me
+                </label>
+              </div>
+              <Link to="#" className="font-medium text-teal-600 hover:text-teal-500 dark:text-teal-400 dark:hover:text-teal-300">Forgot Password?</Link>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full py-2 px-4 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition duration-300 ease-in-out font-semibold ${
-                loading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {loading ? 'Signing in...' : 'Login'}
-            </button>
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 dark:bg-teal-600 dark:hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-150 ease-in-out ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {loading ? 'Signing in...' : 'Sign in'}
+              </button>
+            </div>
           </form>
 
-          <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-6 text-sm text-gray-600 dark:text-gray-400 text-left">
             Don't have an account?{' '}
-            <Link to="/register" className="text-teal-500 hover:underline dark:text-teal-300">Sign Up</Link>
+            <Link to="/register" className="font-medium text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300">
+              Sign Up
+            </Link>
           </p>
         </div>
       </div>
