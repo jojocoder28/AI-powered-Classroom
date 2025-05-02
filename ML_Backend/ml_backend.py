@@ -27,7 +27,7 @@ load_dotenv()
 COHERE_API_KEY = os.getenv('COHERE_API_KEY')
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["http://localhost:5173"])
 
 # ------------------ YOLO Detection Setup ------------------ #
 model = YOLO("./Models/best.pt")  # Your trained YOLO model
