@@ -136,6 +136,10 @@ def process_assignment_pdfs():
 
     return jsonify({"message": "Hi learner, I'am Vidyana your own learning AI."})
 
+def strip_backticks(text):
+    if text.startswith("```") and text.endswith("```"):
+        return text[3:-3].strip()
+    return text
 
 @app.route('/ask', methods=['POST'])
 def ask_question():
@@ -159,11 +163,11 @@ def generate_quiz():
     if retriever is None:
         return jsonify({"error": "RAG not built yet from PDFs."}), 400
 
-    if "quiz" in quiz_cache:
-        return jsonify({"quiz": quiz_cache["quiz"]})
+    # if "quiz" in quiz_cache:
+    #     return jsonify({"quiz": quiz_cache["quiz"]})
 
     # Fetch more documents for better quiz generation context
-    context_docs = retriever.get_relevant_documents("generate a quiz about the document content")
+    context_docs = retriever.get_relevant_documents("generate a quiz")
     context_text = "\n\n".join([doc.page_content for doc in context_docs])
 
     prompt = (
@@ -172,7 +176,7 @@ def generate_quiz():
         "- a 'question' field,\n"
         "- an 'options' list (4 options), and\n"
         "- a 'correct_answer' field.\n"
-        "The output format should be a valid JSON list of objects.\n\n"
+        "The output format must be a valid JSON list of objects.\n\n"
         "Context:\n"
         f"{context_text}\n\n"
         "Generate the quiz now:"
@@ -182,10 +186,12 @@ def generate_quiz():
 
     try:
         response = llm.invoke(prompt)
+        # print(response.content)
+        
         # Attempt to parse and re-serialize to ensure valid JSON output
-        quiz_data = json.loads(response.content)
-        quiz_cache["quiz"] = json.dumps(quiz_data)
-        return jsonify({"quiz": quiz_cache["quiz"]})
+        response = llm.invoke(prompt)
+        quiz_cache["quiz"] = response.content  # Cache new quiz
+        return {"quiz": response.content}
     except json.JSONDecodeError as e:
          print(f"Error decoding JSON from LLM response: {e}")
          return jsonify({"error": "Failed to generate valid JSON quiz."}), 500
