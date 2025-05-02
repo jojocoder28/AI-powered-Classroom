@@ -59,7 +59,7 @@ const RagChat = () => {
           });
           // Assuming assignments are in response.data.classroom.assignments
           // And each assignment has a submissionFile object with a url
-          setAssignments(response.data.classroom.assignments || []);
+          setAssignments(response.data.assignments || []);
         } catch (err) {
           console.error('Error fetching assignments:', err);
           setError('Failed to fetch assignments.');
