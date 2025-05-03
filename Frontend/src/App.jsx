@@ -6,6 +6,7 @@ import VideoPage from './components/VideoPage'
 import CourseQA from './components/CourseQA'
 import RAGQA  from './components/Ragqa'
 import QuizApp from './components/QuizApp'
+import AdminUserPage from './admin/AdminUserPage'
 
 function App() {
 const router = createBrowserRouter([
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
   {
     path: "/quiz",         // ⬅️ NEW route
     element: <QuizApp />
+  },
+  {
+    path: "/admin",         // ⬅️ NEW route
+    element: <AdminUserPage/>
   }
 ])
 
