@@ -25,6 +25,9 @@ router.get('/profile', isAuthenticated, userCtrl.profile);
 // If you want image update here too, add: upload.single('profileImage')
 router.put('/profile', isAuthenticated, upload.single('profileImage'), userCtrl.updateProfile);
 
+// Admin deletes a user by ID
+router.delete("/admin/delete/:userId", protect, userCtrl.deleteUserById);
+
 // Logout User
 router.post('/logout', userCtrl.logout);
 

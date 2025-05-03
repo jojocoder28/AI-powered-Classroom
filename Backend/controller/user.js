@@ -354,6 +354,46 @@ const userCtrl = {
       }
     }
   }),
+  //! Delete User by ID (Admin only)
+deleteUserById: asyncHandler(async (req, res) => {
+  const userId = req.params.userId;
+
+  // Check if the requester is an admin
+  const requester = await User.findById(req.user);
+  if (!requester || requester.role !== 'Admin') {
+    res.status(403); // Forbidden
+    throw new Error("Access denied. Only admins can delete users.");
+  }
+
+  // Find the user to delete
+  const user = await User.findById(userId);
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  // Find and delete the user's profile image from Cloudinary
+  const userImage = await UserImage.findOne({ user: userId });
+  if (userImage?.publicId) {
+    try {
+      await cloudinary.uploader.destroy(userImage.publicId);
+      await userImage.deleteOne();
+      console.log(`Deleted Cloudinary image for user ${userId}`);
+    } catch (err) {
+      console.error("Failed to delete image from Cloudinary:", err.message);
+    }
+  }
+
+  // Delete the user document
+  await user.deleteOne();
+
+  res.status(200).json({
+    success: true,
+    message: "User deleted successfully",
+    deletedUserId: userId,
+  });
+}),
+
 
   //!Logout
   logout: asyncHandler(async (req, res) => {
