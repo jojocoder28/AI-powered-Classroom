@@ -8,12 +8,14 @@ const {
     submitQuiz,
     getQuizResults,
     saveEmotion,
-    getEmotions,
+    //getEmotions,
     submitAssignment,
-    getAssignments
-} = require('../controllers/studentActivityController');
+    getAssignments,
+    getLatestEmotionsForStudents // Import the new controller function
+} = require('../controller/studentActivityController');
 
 const isStudentAuthenticated = require('../middlewares/isStudentAuthenticated');
+const isTeacherAuthenticated = require('../middlewares/isTeacherAuthenticated'); // Import teacher middleware
 
 const storage = multer.memoryStorage();
 const fileFilter = (req, file, cb) => {
@@ -47,10 +49,11 @@ const upload = multer({
 router.post('/quiz', isStudentAuthenticated, submitQuiz);
 router.post('/emotion', isStudentAuthenticated, saveEmotion);
 router.post('/assignment/:classroomId', isStudentAuthenticated, upload.single('assignmentFile'), submitAssignment);
+router.post('/latestEmotions', isTeacherAuthenticated, getLatestEmotionsForStudents); // New route for fetching latest emotions
 
 // --- GET Routes ---
 router.get('/quiz', isStudentAuthenticated, getQuizResults);
-router.get('/emotion', isStudentAuthenticated, getEmotions);
+//router.get('/emotion', isStudentAuthenticated, getEmotions);
 router.get('/assignment', isStudentAuthenticated, getAssignments);
 
 module.exports = router;

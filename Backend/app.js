@@ -10,6 +10,7 @@ const { initializeSocket } = require("./controller/conferenceController");
 const classroomRouter = require('./routes/classroomRouter');
 const errorHandler = require("./middlewares/errorHandler");
 const cookieParser = require('cookie-parser');
+const studentActivityRouter = require("./routes/studentActivityRouter");
 
 dotenv.config();
 const dburl = process.env.MONGO_URI;
@@ -42,6 +43,7 @@ app.use(express.json()); // Parse JSON request body
 app.use("/api/users", router);
 app.use("/api/conference", conferenceRouter);
 app.use('/api/classrooms', classroomRouter);
+app.use("/api/studentactivity", studentActivityRouter);
 
 //! Initialize Socket.io
 initializeSocket(io);

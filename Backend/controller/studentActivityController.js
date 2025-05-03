@@ -1,9 +1,10 @@
 // --- controllers/studentActivityController.js ---
 const asyncHandler = require("express-async-handler");
-const { QuizParticipation, Emotion, AssignmentSubmission } = require("../models/studentActivityModel");
+const { QuizParticipation, Emotion, AssignmentSubmission } = require("../model/studentActivityModel");
 const cloudinary = require('../cloudinary');
 const streamifier = require('streamifier');
 const { ErrorHandler } = require("../utils/errorHandler");
+const mongoose = require('mongoose');
 
 // Quiz Participation
 const submitQuiz = asyncHandler(async (req, res, next) => {
@@ -55,6 +56,38 @@ const getEmotions = asyncHandler(async (req, res, next) => {
     const studentId = req.user._id;
     const records = await Emotion.find({ student: studentId }).sort({ timestamp: -1 });
     res.status(200).json({ success: true, count: records.length, emotions: records });
+});
+
+// New function to get the latest emotion for a list of students (for teachers)
+const getLatestEmotionsForStudents = asyncHandler(async (req, res, next) => {
+    // Ensure user is a teacher
+    if (req.user.role !== 'Teacher') {
+        return next(new ErrorHandler("Only teachers can view student emotions", 403));
+    }
+
+    let { studentIds } = req.body; // Expecting an array of student IDs
+    if (!Array.isArray(studentIds)) {
+        studentIds = [studentIds];
+      }
+    if (!Array.isArray(studentIds) || studentIds.length === 0) {
+        return next(new ErrorHandler("Invalid or empty studentIds provided", 400));
+    }
+
+    // Find the latest emotion for each student in the provided list
+    const latestEmotions = await Emotion.aggregate([
+        { $match: { student: { $in: studentIds.map(id => new mongoose.Types.ObjectId(id)) } } }, // Match provided student IDs
+        { $sort: { student: 1, timestamp: -1 } }, // Sort by student and then timestamp descending
+        { $group: { _id: '$student', latestEmotion: { $first: '$emotion' }, timestamp: { $first: '$timestamp' } } }, // Group by student to get the latest
+         { $project: { _id: 0, student: '$_id', emotion: '$latestEmotion', timestamp: '$timestamp' } } // Reshape the output
+    ]);
+
+    // Return a map for easy lookup on the frontend
+    const emotionMap = latestEmotions.reduce((acc, curr) => {
+        acc[curr.student] = { emotion: curr.emotion, timestamp: curr.timestamp };
+        return acc;
+    }, {});
+
+    res.status(200).json({ success: true, emotions: emotionMap });
 });
 
 // Assignment Submission
@@ -120,5 +153,6 @@ module.exports = {
     saveEmotion,
     getEmotions,
     submitAssignment,
-    getAssignments
+    getAssignments,
+    getLatestEmotionsForStudents // Export the new function
 };
