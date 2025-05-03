@@ -80,7 +80,7 @@ function QuizPage() {
 
   return (
     <div style={{ padding: '20px' }}>
-      <h1>📘 Course Quiz Generator</h1>
+      <h1>Generate Quiz from Pdf</h1>
 
       {/* PDF Upload Section */}
       <div style={{ marginBottom: '20px' }}>
@@ -91,7 +91,7 @@ function QuizPage() {
       </div>
 
       {/* Quiz Loading */}
-      {loading && <p>📦 Loading quiz, please wait...</p>}
+      {loading && <p> Loading quiz, please wait...</p>}
 
       {/* Quiz Display */}
       {!loading && quiz.length > 0 && (
@@ -122,7 +122,7 @@ function QuizPage() {
       {/* Results */}
       {result && (
         <div style={{ marginTop: '30px' }}>
-          <h2>📊 Your Score: {result.score} / {quiz.length}</h2>
+          <h2>Your Score: {result.score} / {quiz.length}</h2>
           <h3>Detailed Feedback:</h3>
           {result.detailedResults.map((res, i) => (
             <div key={i} style={{ color: res.isCorrect ? 'green' : 'red', marginBottom: '10px' }}>

@@ -86,7 +86,7 @@ const RAGQA = () => {
 
   return (
     <div className="app">
-      <h1>📄 RAG PDF Q&A (Gemini)</h1>
+      <h1> PDF Q & A  </h1>
 
       {/* PDF Upload */}
       <section>

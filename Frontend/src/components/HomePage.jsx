@@ -11,7 +11,9 @@ const navigate = useNavigate();
   return (
     <div>
      <div>
+        <h1> Join Classroom</h1>
         <input value={input} onChange={(e)=>setInput(e.target.value)}type='text' placeholder='Enter Your Name...'/>
+        
         <button onClick={submitHandler}>Join</button>
      </div>
     </div>
