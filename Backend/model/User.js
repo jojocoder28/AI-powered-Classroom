@@ -13,6 +13,8 @@ const baseUserSchema = new Schema({
   password: { type: String, required: true },
   phoneNumber: { type: String, required: true },
   role: { type: String, required: true, enum: ['Student', 'Teacher', 'Admin'], index: true },
+  bio: {type:String, required: false},
+  location: {type:String, require:false},
 }, baseOptions);
 
 const User = mongoose.model("User", baseUserSchema);

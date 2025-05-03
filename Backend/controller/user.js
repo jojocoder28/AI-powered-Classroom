@@ -269,7 +269,7 @@ const userCtrl = {
       const {
         email, username, password,
         firstName, lastName, phoneNumber, university,
-        department, designation, fullName,
+        department, designation, bio, location, fullName,
       } = req.body;
 
       const user = await User.findById(userId);
@@ -288,6 +288,8 @@ const userCtrl = {
         if (lastName) user.lastName = lastName;
         if (phoneNumber) user.phoneNumber = phoneNumber;
         if (university) user.university = university;
+        if (bio) user.bio = bio;
+        if (location) user.location = location;
       }
 
       if (user.role === "Teacher") {

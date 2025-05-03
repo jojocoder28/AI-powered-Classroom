@@ -182,21 +182,21 @@ function Profile() {
   return (
     <div className="min-h-screen w-full flex justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-10 px-4 sm:px-6 lg:px-8 text-gray-800 dark:text-gray-200">
       <div className="max-w-4xl w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
-        <div className="relative h-40 bg-gradient-to-r from-indigo-500 to-blue-500 dark:from-indigo-700 dark:to-blue-700">{/* Background color/image placeholder */}</div>
+        <div className="relative h-40 bg-gradient-to-r from-teal-700 to-blue-500 dark:from-bg-teal-700 dark:to-blue-700">{/* Background color/image placeholder */}</div>
 
         <div className="p-6 sm:p-8 md:p-10 -mt-20 flex flex-col items-center">
 
           {/* Profile Image */}
           <div className="relative">
             <img
-              src={previewImage || profile.profileImageUrl || 'https://via.placeholder.com/150'} // Placeholder image
+              src={previewImage || profile.profileImageUrl || 'default.jpg'} // Placeholder image
               alt="Profile Avatar"
               className="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-lg"
-              onError={(e) => { e.target.onerror = null; e.target.src='https://via.placeholder.com/150'; }} // Error fallback
+              onError={(e) => { e.target.onerror = null; e.target.src='default.jpg'; }} // Error fallback
             />
              {/* Camera Icon for Image Upload in Edit Mode */}
             {editMode && isMyProfile && (
-               <div className="absolute bottom-0 right-0 bg-blue-500 dark:bg-blue-600 rounded-full p-2 cursor-pointer shadow-md hover:bg-blue-600 dark:hover:bg-blue-700 transition duration-300" onClick={() => document.getElementById('profile-image-input')?.click()}>
+               <div className="absolute bottom-0 right-0 bg-teal-700 dark:bg-teal-700 rounded-full p-2 cursor-pointer shadow-md hover:bg-blue-600 dark:hover:bg-blue-700 transition duration-300" onClick={() => document.getElementById('profile-image-input')?.click()}>
                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A1 1 0 0011.381 3H8.618a1 1 0 00-.707.293L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
                    </svg>
@@ -215,22 +215,22 @@ function Profile() {
           {/* Name and Basic Info */}
           <div className="text-center mt-4">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-200">{profile.firstName} {profile.lastName} {profile.age && `, ${profile.age}`}</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{profile.location || 'Location N/A'}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{profile.email}</p>
           </div>
 
           {/* Stats Section (Placeholder/Example) */}
           <div className="flex justify-center space-x-8 mt-6 py-4 border-y border-gray-200 dark:border-gray-700 w-full max-w-xs">
             <div className="text-center">
-              <p className="text-lg font-bold text-gray-800 dark:text-gray-200">N/A</p> {/* Replace with actual data like friends count */}
-              <p className="text-sm text-gray-600 dark:text-gray-400">Friends</p>
+              <p className="text-lg font-bold text-gray-800 dark:text-gray-200">{profile.university}</p> {/* Replace with actual data like friends count */}
+              <p className="text-sm text-gray-600 dark:text-gray-400">University</p>
             </div>
             <div className="text-center">
-              <p className="text-lg font-bold text-gray-800 dark:text-gray-200">N/A</p> {/* Replace with actual data like photos count */}
-              <p className="text-sm text-gray-600 dark:text-gray-400">Photos</p>
+              <p className="text-lg font-bold text-gray-800 dark:text-gray-200">{profile.department}</p> {/* Replace with actual data like photos count */}
+              <p className="text-sm text-gray-600 dark:text-gray-400">Department</p>
             </div>
             <div className="text-center">
-              <p className="text-lg font-bold text-gray-800 dark:text-gray-200">N/A</p> {/* Replace with actual data like comments count */}
-              <p className="text-sm text-gray-600 dark:text-gray-400">Comments</p>
+              <p className="text-lg font-bold text-gray-800 dark:text-gray-200">{profile.phoneNumber}</p> {/* Replace with actual data like comments count */}
+              <p className="text-sm text-gray-600 dark:text-gray-400">Phone</p>
             </div>
           </div>
 
@@ -239,18 +239,18 @@ function Profile() {
               {profile.role === 'Teacher' && profile.designation && (
                    <p className="text-lg text-gray-700 dark:text-gray-300 font-semibold">{profile.designation}</p>
               )}
-              {profile.university && (
-                  <p className="text-md text-gray-600 dark:text-gray-400">{profile.university}</p>
+              {profile.location && (
+                  <p className="text-md text-gray-600 dark:text-gray-400">{profile.location}</p>
               )}
-               {profile.department && (
+               {/* {profile.location && (
                   <p className="text-md text-gray-600 dark:text-gray-400">{profile.department}</p>
-              )}
+              )} */}
            </div>
 
           {/* Bio/Description Section */}
            {profile.bio && (
                <div className="mt-6 text-center max-w-2xl">
-                   <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{profile.bio}</p>
+                   <p className="text-2xl text-gray-200 dark:text-gray-300 leading-relaxed">{profile.bio}</p>
                </div>
            )}
 
@@ -269,7 +269,7 @@ function Profile() {
                         setMessage('');
                         setError('');
                       }}
-                      className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 font-medium"
+                      className="px-6 py-2 bg-teal-700 cursor-pointer text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 font-medium"
                   >
                       Edit Profile
                   </button>
@@ -277,7 +277,7 @@ function Profile() {
                {/* Connect/Message Buttons (Placeholders) - Show if viewing another profile */}
               {!isMyProfile && (
                    <>
-                       <button className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-150 font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>{/* Implement Connect Logic */}
+                       <button className="px-6 py-2 bg-teal-700 text-white rounded-md hover:bg-blue-600 transition duration-150 font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>{/* Implement Connect Logic */}
                            Connect
                        </button>
                        <button className="px-6 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-700 transition duration-150 font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>{/* Implement Message Logic */}
