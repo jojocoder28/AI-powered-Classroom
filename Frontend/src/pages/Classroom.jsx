@@ -90,7 +90,7 @@ function Classroom() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 px-6 py-6 space-y-6 overflow-x-hidden">
+    <div className="min-h-screen w-full bg-transparent text-gray-800 px-6 py-6 space-y-6 overflow-x-hidden">
       {/* Header Section */}
       <header className="text-center">
         <h1 className="text-3xl font-bold text-indigo-700">Welcome to the Classroom</h1>
@@ -98,8 +98,8 @@ function Classroom() {
       </header>
 
       {/* Classroom List */}
-      <section className="bg-white rounded-2xl shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Your Classrooms</h2>
+      <section className="bg-gray-800 rounded-2xl shadow-md p-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-100">Your Classrooms</h2>
         <ClassroomListPanel
           classrooms={classrooms}
           isLoading={isLoading}
@@ -122,8 +122,8 @@ function Classroom() {
       )}
 
       {/* Participants */}
-      <section className="bg-white rounded-2xl shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Participants</h2>
+      <section className="bg-gray-800 rounded-2xl shadow-md p-6">
+        <h2 className="text-xl font-semibold mb-4 text-white">Participants</h2>
         <ParticipantsSection classroomId={roomId} />
       </section>
 

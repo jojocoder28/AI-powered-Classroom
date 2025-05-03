@@ -52,7 +52,7 @@ function MyClassrooms() {
         } finally {
             setLoadingMyClassrooms(false);
         }
-    }, []);
+    }, [isAuthenticated, backend_api]);
 
     // Fetch classrooms available for joining (students only)
     const fetchAvailableClassrooms = useCallback(async () => {
@@ -81,7 +81,7 @@ function MyClassrooms() {
         if (user?.role === 'Student') {
             fetchAvailableClassrooms();
         }
-    }, []);
+    }, [fetchMyClassrooms, fetchAvailableClassrooms, user?.role]); // Added dependencies
 
     // --- Event Handlers ---
 
@@ -104,20 +104,18 @@ function MyClassrooms() {
             setNewClassName('');
             setNewClassDesc('');
             await fetchMyClassrooms(); // Refresh user's classroom list
-            // No need to refresh available classrooms here
         } catch (err) {
             console.error("Error creating classroom:", err);
             setCreateError(err.response?.data?.message || "Failed to create classroom.");
         } finally {
             setIsCreating(false);
-            // Optionally clear message after a delay
             setTimeout(() => setCreateMessage(null), 3000);
         }
     };
 
     // Handler for joining a classroom (Students)
     const handleJoinClassroom = async (joinCode, classroomId) => {
-        setJoiningClassroomId(classroomId); // Set loading state for this specific button
+        setJoiningClassroomId(classroomId); 
         setIsJoining(true);
         setJoinError(null);
         setJoinMessage(null);
@@ -134,8 +132,7 @@ function MyClassrooms() {
             setJoinError(err.response?.data?.message || "Failed to join classroom.");
         } finally {
             setIsJoining(false);
-            setJoiningClassroomId(null); // Clear loading state for button
-             // Optionally clear message/error after a delay
+            setJoiningClassroomId(null); 
             setTimeout(() => {
                 setJoinMessage(null);
                 setJoinError(null);
@@ -145,31 +142,31 @@ function MyClassrooms() {
 
     // --- Render Logic ---
     if (!isAuthenticated) {
-        return <p className="text-red-500 p-4">Please log in to view classrooms.</p>; 
+        return <p className="text-center text-red-500 p-6 text-lg">Please log in to view classrooms.</p>; 
     }
 
     return (
-        <div className="mt-8 space-y-10">
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
             {/* Teacher: Classroom Creation Form */}
             {user?.role === 'Teacher' && (
-                <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-                    <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Create New Classroom</h3>
-                    <form onSubmit={handleCreateClassroom} className="space-y-4">
+                <div className="mb-10 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
+                    <h3 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white border-b pb-3 border-gray-200 dark:border-gray-700">Create New Classroom</h3>
+                    <form onSubmit={handleCreateClassroom} className="space-y-5">
                         {/* Name Input */}
                         <div>
-                            <label htmlFor="newClassName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Classroom Name</label>
-                            <input type="text" id="newClassName" value={newClassName} onChange={(e) => setNewClassName(e.target.value)} placeholder="e.g., Advanced React" required className="w-full input-style" />
+                            <label htmlFor="newClassName" className="block text-sm font-medium text-gray-200 dark:text-gray-300 mb-2">Classroom Name</label>
+                            <input type="text" id="newClassName" value={newClassName} onChange={(e) => setNewClassName(e.target.value)} placeholder="e.g., Advanced React" required className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" />
                         </div>
                         {/* Description Input */}
                         <div>
-                            <label htmlFor="newClassDesc" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description (Optional)</label>
-                            <textarea id="newClassDesc" value={newClassDesc} onChange={(e) => setNewClassDesc(e.target.value)} placeholder="Describe the classroom" rows="3" className="w-full input-style" />
+                            <label htmlFor="newClassDesc" className="block text-sm font-medium text-gray-200 dark:text-gray-300 mb-2">Description (Optional)</label>
+                            <textarea id="newClassDesc" value={newClassDesc} onChange={(e) => setNewClassDesc(e.target.value)} placeholder="Describe the classroom" rows="4" className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" />
                         </div>
                         {/* Messages/Errors */}
-                        {createMessage && <p className="text-green-600 text-sm">{createMessage}</p>}
-                        {createError && <p className="text-red-500 text-sm">{createError}</p>}
+                        {createMessage && <p className="text-green-600 text-sm mt-2">{createMessage}</p>}
+                        {createError && <p className="text-red-500 text-sm mt-2">{createError}</p>}
                         {/* Submit Button */}
-                        <button type="submit" disabled={isCreating} className={`w-full btn-primary ${isCreating ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                        <button type="submit" disabled={isCreating} className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${isCreating ? 'opacity-50 cursor-not-allowed' : ''}`}>
                             {isCreating ? 'Creating...' : 'Create Classroom'}
                         </button>
                     </form>
@@ -177,30 +174,30 @@ function MyClassrooms() {
             )}
 
             {/* User's Enrolled/Taught Classrooms Section */}
-            <div>
-                <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white">My Classrooms</h2>
-                {loadingMyClassrooms && <p className="text-gray-600 dark:text-gray-400">Loading your classrooms...</p>}
-                {!loadingMyClassrooms && errorMyClassrooms && <p className="text-red-500">Error: {errorMyClassrooms}</p>}
+            <div className="mb-10">
+                <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white border-b pb-3 border-gray-200 dark:border-gray-700">My Classrooms</h2>
+                {loadingMyClassrooms && <p className="text-center text-gray-600 dark:text-gray-400 text-lg">Loading your classrooms...</p>}
+                {!loadingMyClassrooms && errorMyClassrooms && <p className="text-center text-red-500 text-lg">Error: {errorMyClassrooms}</p>}
                 {!loadingMyClassrooms && !errorMyClassrooms && myClassrooms.length === 0 && (
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-center text-gray-600 dark:text-gray-400 text-lg">
                         {user?.role === 'Teacher' ? "You haven't created or joined any classrooms yet." : "You are not enrolled in any classrooms yet."}
                     </p>
                 )}
                 {!loadingMyClassrooms && myClassrooms.length > 0 && (
-                    <ul className="space-y-4">
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {myClassrooms.map((classroom) => (
-                            <li key={classroom._id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-gray-800 hover:shadow-md transition-shadow duration-200 flex justify-between items-center">
+                            <li key={classroom._id} className="p-6 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg bg-white dark:bg-gray-800 hover:shadow-xl transition-shadow duration-300 flex flex-col justify-between">
                                 <div>
-                                    <h3 className="text-xl font-medium text-indigo-600 dark:text-indigo-400 mb-1">{classroom.name}</h3>
-                                    {classroom.description && <p className="text-gray-700 dark:text-gray-300 mb-2 text-sm">{classroom.description}</p>}
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    <h3 className="text-xl font-semibold text-indigo-600 dark:text-indigo-400 mb-2">{classroom.name}</h3>
+                                    {classroom.description && <p className="text-gray-700 dark:text-gray-300 mb-3 text-sm">{classroom.description}</p>}
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                                         Role: <span className={`font-medium ${classroom.teacher?._id === user?._id ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'}`}>
                                             {classroom.teacher?._id === user?._id ? 'Teacher' : 'Student'}
                                         </span>
                                     </p>
                                 </div>
-                                <Link to={`/classroom/${classroom._id}`} className="btn-secondary text-sm py-1 px-3">
-                                    View
+                                <Link to={`/classroom/${classroom._id}`} className="inline-block w-full text-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900 dark:text-indigo-200 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    View Classroom
                                 </Link> 
                             </li>
                         ))}
@@ -211,31 +208,29 @@ function MyClassrooms() {
             {/* Student: Available Classrooms to Join Section */}
             {user?.role === 'Student' && (
                 <div>
-                    <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white">Available Classrooms to Join</h2>
+                    <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white border-b pb-3 border-gray-200 dark:border-gray-700">Available Classrooms to Join</h2>
                     {/* Join Action Messages/Errors */} 
-                    {joinMessage && <p className="text-green-600 mb-3 text-sm">{joinMessage}</p>}
-                    {joinError && <p className="text-red-500 mb-3 text-sm">{joinError}</p>}
+                    {joinMessage && <p className="text-green-600 mb-4 text-sm text-center">{joinMessage}</p>}
+                    {joinError && <p className="text-red-500 mb-4 text-sm text-center">{joinError}</p>}
 
-                    {loadingAvailable && <p className="text-gray-600 dark:text-gray-400">Loading available classrooms...</p>}
-                    {!loadingAvailable && errorAvailable && <p className="text-red-500">Error: {errorAvailable}</p>}
+                    {loadingAvailable && <p className="text-center text-gray-600 dark:text-gray-400 text-lg">Loading available classrooms...</p>}
+                    {!loadingAvailable && errorAvailable && <p className="text-center text-red-500 text-lg">Error: {errorAvailable}</p>}
                     {!loadingAvailable && !errorAvailable && availableClassrooms.length === 0 && (
-                        <p className="text-gray-600 dark:text-gray-400">There are no other classrooms available for you to join at this time.</p>
+                        <p className="text-center text-gray-600 dark:text-gray-400 text-lg">There are no other classrooms available for you to join at this time.</p>
                     )}
                     {!loadingAvailable && availableClassrooms.length > 0 && (
-                        <ul className="space-y-4">
+                        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {availableClassrooms.map((classroom) => (
-                                <li key={classroom._id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-gray-800 hover:shadow-md transition-shadow duration-200 flex justify-between items-center">
+                                <li key={classroom._id} className="p-6 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg bg-white dark:bg-gray-800 hover:shadow-xl transition-shadow duration-300 flex flex-col justify-between">
                                     <div>
-                                        <h3 className="text-xl font-medium text-indigo-600 dark:text-indigo-400 mb-1">{classroom.name}</h3>
-                                        {classroom.description && <p className="text-gray-700 dark:text-gray-300 mb-2 text-sm">{classroom.description}</p>}
-                                        {classroom.teacher && <p className="text-sm text-gray-500 dark:text-gray-400">Taught by: {classroom.teacher.name}</p>}
-                                        {/* Display Join Code for debugging if needed, but usually hide from student */}
-                                        {/* <p className="text-xs text-gray-400">Code: {classroom.joinCode}</p> */} 
+                                        <h3 className="text-xl font-semibold text-indigo-600 dark:text-indigo-400 mb-2">{classroom.name}</h3>
+                                        {classroom.description && <p className="text-gray-700 dark:text-gray-300 mb-3 text-sm">{classroom.description}</p>}
+                                        {classroom.teacher && <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Taught by: {classroom.teacher.name}</p>}
                                     </div>
                                     <button 
                                         onClick={() => handleJoinClassroom(classroom.joinCode, classroom._id)}
                                         disabled={isJoining && joiningClassroomId === classroom._id}
-                                        className={`btn-primary text-sm py-1 px-3 ${isJoining && joiningClassroomId === classroom._id ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                        className={`inline-block w-full text-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${isJoining && joiningClassroomId === classroom._id ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                         {isJoining && joiningClassroomId === classroom._id ? 'Joining...' : 'Join'}
                                     </button>
                                 </li>
@@ -248,70 +243,7 @@ function MyClassrooms() {
     );
 }
 
-// Basic input style for consistency (optional, adjust as needed)
-const InputStyle = () => (
-  <style>{`
-    .input-style {
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #D1D5DB; /* gray-300 */
-      border-radius: 0.375rem; /* rounded-md */
-      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
-      background-color: white;
-      color: #111827; /* gray-900 */
-    }
-    .input-style:focus {
-      outline: none;
-      border-color: #4F46E5; /* indigo-500 */
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3); /* focus:ring-indigo-500/30 */
-    }
-    .dark .input-style {
-      background-color: #374151; /* dark:bg-gray-700 */
-      border-color: #4B5563; /* dark:border-gray-600 */
-      color: #F9FAFB; /* dark:text-white */
-    }
-    /* Basic Button Styles (adapt to your project's design system) */
-    .btn-primary {
-        padding: 0.5rem 1rem;
-        background-color: #4F46E5; /* bg-indigo-600 */
-        color: white;
-        border-radius: 0.375rem; /* rounded-md */
-        font-weight: 500; /* font-medium */
-        transition: background-color 0.15s ease-in-out;
-    }
-    .btn-primary:hover {
-        background-color: #4338CA; /* hover:bg-indigo-700 */
-    }
-    .btn-secondary {
-        padding: 0.5rem 1rem;
-        background-color: #E5E7EB; /* bg-gray-200 */
-        color: #1F2937; /* text-gray-800 */
-        border-radius: 0.375rem; /* rounded-md */
-        font-weight: 500; /* font-medium */
-        transition: background-color 0.15s ease-in-out;
-    }
-    .btn-secondary:hover {
-        background-color: #D1D5DB; /* hover:bg-gray-300 */
-    }
-     .dark .btn-secondary {
-        background-color: #4B5563; /* dark:bg-gray-600 */
-        color: #F9FAFB; /* dark:text-gray-100 */
-    }
-    .dark .btn-secondary:hover {
-        background-color: #525f73; /* dark:hover:bg-gray-500 */
-    }
-  `}</style>
-);
+// Note: Removed the InputStyle component as direct Tailwind classes are used.
+// The export default MyClassroomsWrapper is also removed.
 
-// Inject styles (optional, consider moving to CSS file)
-function MyClassroomsWrapper() {
-    return (
-        <>
-            <InputStyle /> 
-            <MyClassrooms />
-        </>
-    );
-}
-
-// export default MyClassroomsWrapper; // Use this if you include the styles
-export default MyClassrooms; // Use this if styles are handled globally or in CSS
-
+export default MyClassrooms; 

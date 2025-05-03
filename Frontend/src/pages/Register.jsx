@@ -123,12 +123,7 @@ function Register() {
             <InputField label="Designation" name="designation" value={formData.designation} onChange={handleChange} required />
           </>
         );
-      case 'Admin':
-        return (
-          <>
-            <InputField label="Full Name" name="fullName" value={formData.fullName} onChange={handleChange} required />
-          </>
-        );
+      
       default:
         return null;
     }
@@ -163,7 +158,6 @@ function Register() {
              <select id="role" name="role" required value={formData.role} onChange={handleChange} className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm bg-mint-cream dark:bg-gray-800 text-left">
                <option value="Student">Student</option>
                <option value="Teacher">Teacher</option>
-               <option value="Admin">Admin</option>
              </select>
            </div>
           <InputField label="Username" name="username" value={formData.username} onChange={handleChange} required />
