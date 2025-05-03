@@ -21,7 +21,7 @@ from langchain_chroma import Chroma
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_cohere import CohereEmbeddings
+# from langchain_cohere import CohereEmbeddings
 
 load_dotenv()
 COHERE_API_KEY = os.getenv('COHERE_API_KEY')
@@ -39,6 +39,7 @@ def detect():
 
     file = request.files['frame']
     image = Image.open(file.stream).convert("RGB")
+    image=image.resize((96, 96))  # Resize to model input size
     image_np = np.array(image)
 
     results = model(image_np)

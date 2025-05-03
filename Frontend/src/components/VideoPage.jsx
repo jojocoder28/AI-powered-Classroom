@@ -1,6 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
+import axios from 'axios';
+import {backend_api} from '../config';
 
 const VideoPage = (ref) => {
   const roomId = ref.roomId;
@@ -18,8 +20,6 @@ const VideoPage = (ref) => {
     );
 
     const zp = ZegoUIKitPrebuilt.create(kitToken);
-    
-    // Get the container element by its ID
     const container = document.getElementById('zego-container');
 
     zp.joinRoom({
@@ -41,10 +41,6 @@ const VideoPage = (ref) => {
       },
     });
 
-    // After some time, start frame capturing
-    // Note: Frame capturing logic might need adjustment without direct ref access
-    // If container.querySelector('video') still works, keep it. Otherwise, 
-    // you might need a different approach to access the video element.
     const captureInterval = setInterval(() => {
       const video = container?.querySelector('video');
       if (video && video.readyState >= 2) {
@@ -60,15 +56,30 @@ const VideoPage = (ref) => {
             const formData = new FormData();
             formData.append('frame', blob);
 
-            fetch('http://localhost:5000/detect', {
-              method: 'POST',
-              body: formData,
-            })
-              .then((res) => res.json())
-              .then((data) => {
-                console.log('Detections:', data.detections);
+            axios.post('http://localhost:5000/detect', formData)
+              .then((res) => {
+                const data = res.data;
                 if (data.detections && data.detections.length > 0) {
-                  console.log('Top class:', data.detections[0].class_name);
+                  const detectedEmotion = data.detections[0].class_name;
+                  const timestamp = new Date().toISOString();
+
+                  console.log('Detected Emotion:', detectedEmotion);
+
+                  axios.post(`${backend_api}/api/studentactivity/emotion`, {
+                    emotion: detectedEmotion,
+                    timestamp: timestamp,
+                  }, {
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    withCredentials: true,
+                  })
+                    .then((res) => {
+                      console.log('Emotion saved to backend:', res.data);
+                    })
+                    .catch((err) => {
+                      console.error('Error saving emotion:', err);
+                    });
                 }
               })
               .catch((err) => {
@@ -77,12 +88,12 @@ const VideoPage = (ref) => {
           }
         }, 'image/jpeg');
       }
-    }, 2000); // every 2 seconds
+    }, 2000);
 
     return () => clearInterval(captureInterval);
   }, [roomID]);
 
-  return <div id="zego-container" style={{ zIndex:100, width: '100%', height: '100vh' }} />;
+  return <div id="zego-container" style={{ zIndex: 100, width: '100%', height: '100vh' }} />;
 };
 
 export default VideoPage;
