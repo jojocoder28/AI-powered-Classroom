@@ -45,7 +45,7 @@ const ParticipantsSection = ({ classroomId }) => {
     };
 
     fetchParticipants();
-  }, [classroomId, isAuthenticated, authLoading]); // Depend on classroomId, isAuthenticated, authLoading
+  }, [classroomId, isAuthenticated, authLoading, backend_api]); // Added backend_api dependency
 
   // Effect to fetch participant emotions (only for teachers)
   useEffect(() => {
@@ -89,49 +89,55 @@ const ParticipantsSection = ({ classroomId }) => {
     intervalId = setInterval(fetchParticipantEmotions, 5000);
   
     return () => clearInterval(intervalId);
-  }, [isAuthenticated, user?.role, participants]); // ✅ updated dependencies
-   // Depend on auth state and participants list
+  }, [isAuthenticated, user?.role, participants, backend_api]); // Added backend_api dependency
 
   if (authLoading) {
-    return <div className="border rounded p-4 my-4"><p>Verifying authentication...</p></div>;
+    return <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg text-center text-gray-600 dark:text-gray-300">Verifying authentication...</div>;
   }
 
+  // Use gray-700 for text in light mode for better readability, gray-200 in dark mode
+  const textColorClass = "text-gray-700 dark:text-gray-200";
+  const titleColorClass = "text-gray-800 dark:text-gray-200";
+  const borderColorClass = "border-gray-200 dark:border-gray-700";
+
   return (
-    <div className="border rounded p-4 my-4">
-      <h3 className="text-lg font-semibold mb-3">Participants</h3>
-      {isLoading && <p className="text-gray-500">Loading participants...</p>}
-      {error && <p className="text-red-600">Error: {error}</p>}
+    <div className={`p-6 rounded-xl bg-white dark:bg-gray-800 shadow-lg ${textColorClass}`}>
+      <h3 className={`text-2xl font-bold mb-4 border-b pb-3 ${borderColorClass} ${titleColorClass}`}>Participants</h3>
+      
+      {isLoading && <p className="text-center text-gray-600 dark:text-gray-300 text-lg">Loading participants...</p>}
+      {error && <p className="text-center text-red-500 text-lg">Error: {error}</p>}
       {!isLoading && !error && !isAuthenticated && (
-        <p className="text-yellow-600">Please log in to see the participants.</p>
+        <p className="text-center text-yellow-600 dark:text-yellow-400 text-lg">Please log in to see the participants.</p>
       )}
+      
       {!isLoading && !error && isAuthenticated && (
         participants.length > 0 ? (
-          <ul className="space-y-2">
+          <ul className="space-y-4">
             {participants.map(participant => {
-              const emotionData = participantEmotions[participant._id]; // Get emotion for participant
+              const emotionData = participantEmotions[participant._id];
               return (
-                <li key={participant._id} className="flex items-center justify-between p-2 bg-gray-50 rounded hover:bg-gray-100">
-                  <div>
-                    <Link to={`/profile/${participant._id}`} className="font-medium hover:underline">
+                <li key={participant._id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-md shadow-sm hover:bg-gray-100 dark:hover:bg-gray-600 transition duration-200 border border-gray-100 dark:border-gray-600">
+                  <div className="flex items-center mb-2 sm:mb-0">
+                    <Link to={`/profile/${participant._id}`} className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline text-lg">
                       {participant.firstName} {participant.lastName}
                     </Link>
-                    <span className={`ml-2 text-xs font-semibold px-2 py-0.5 rounded ${participant.role === 'Teacher' ? 'bg-blue-200 text-blue-800' : 'bg-green-200 text-green-800'}`}>
+                    <span className={`ml-3 text-xs font-semibold px-2 py-0.5 rounded-full ${participant.role === 'Teacher' ? 'bg-blue-200 text-blue-800' : 'bg-green-200 text-green-800'}`}>
                       {participant.role}
                     </span>
-                    {/* Display emotion if user is Teacher and emotion data exists */}
+                     {/* Display emotion if user is Teacher and emotion data exists */}
                     {user?.role === 'Teacher' && emotionData && ( 
-                      <span className="ml-2 text-sm text-gray-700">
-                        Emotion: {emotionData.emotion}
+                      <span className="ml-3 text-sm text-gray-600 dark:text-gray-300">
+                        Emotion: <span className="font-medium">{emotionData.emotion}</span>
                       </span>
                     )}
                   </div>
-                  <span className="text-sm text-gray-600">{participant.email}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">{participant.email}</span>
                 </li>
               );
             })}
           </ul>
         ) : (
-          <p className="text-gray-500 italic">No participants found for this classroom.</p>
+          <p className="text-center text-gray-600 dark:text-gray-300 text-lg italic">No participants found for this classroom.</p>
         )
       )}
     </div>
