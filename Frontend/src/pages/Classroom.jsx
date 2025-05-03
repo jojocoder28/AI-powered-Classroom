@@ -115,8 +115,8 @@ function Classroom() {
 
       {/* Classroom Details */}
       {selectedClassroom && (
-        <section className="bg-white rounded-2xl shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Classroom Details</h2>
+        <section className="bg-gray-800 rounded-2xl shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-4 text-gray-200">Classroom Details</h2>
           <ClassroomDetailsPanel selectedClassroom={selectedClassroom} />
         </section>
       )}

@@ -93,7 +93,7 @@ const VideoPage = (ref) => {
     return () => clearInterval(captureInterval);
   }, [roomID]);
 
-  return <div id="zego-container" style={{ zIndex: 100, width: '100%', height: '100vh' }} />;
+  return <div id="zego-container" className='w-full h-full' />;
 };
 
 export default VideoPage;

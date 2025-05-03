@@ -19,6 +19,7 @@ function Dashboard() {
 
   return (
     <div className="container mx-auto p-4 md:p-8">
+      <div className="flex flex-col bg-gray-800 py-7 justify-center items-center rounded-4xl shadow-lg shadow-teal-800 mb-6">
       <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Dashboard</h1>
 
       {/* Welcome message */}
@@ -43,9 +44,10 @@ function Dashboard() {
       <Link 
         to="/profile" 
         className="inline-block px-6 py-2 mb-6 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition duration-150"
-      >
+        >
         View User Profile
       </Link>
+        </div>
 
       {/* Display the classrooms list */}
       <MyClassrooms />

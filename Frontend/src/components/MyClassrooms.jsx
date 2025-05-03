@@ -153,12 +153,12 @@ function MyClassrooms() {
                     <h3 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white border-b pb-3 border-gray-200 dark:border-gray-700">Create New Classroom</h3>
                     <form onSubmit={handleCreateClassroom} className="space-y-5">
                         {/* Name Input */}
-                        <div>
+                        <div className='text-gray-200'>
                             <label htmlFor="newClassName" className="block text-sm font-medium text-gray-200 dark:text-gray-300 mb-2">Classroom Name</label>
                             <input type="text" id="newClassName" value={newClassName} onChange={(e) => setNewClassName(e.target.value)} placeholder="e.g., Advanced React" required className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" />
                         </div>
                         {/* Description Input */}
-                        <div>
+                        <div className='text-gray-200'>
                             <label htmlFor="newClassDesc" className="block text-sm font-medium text-gray-200 dark:text-gray-300 mb-2">Description (Optional)</label>
                             <textarea id="newClassDesc" value={newClassDesc} onChange={(e) => setNewClassDesc(e.target.value)} placeholder="Describe the classroom" rows="4" className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" />
                         </div>
