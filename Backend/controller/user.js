@@ -394,6 +394,85 @@ deleteUserById: asyncHandler(async (req, res) => {
   });
 }),
 
+getAllUsers: asyncHandler(async (req, res) => {
+  const requester = await User.findById(req.user);
+  if (!requester || requester.role !== 'Admin') {
+    res.status(403);
+    throw new Error("Access denied. Only admins can view all users.");
+  }
+
+  const users = await User.find().select('-password');
+  res.status(200).json(users);
+}),
+
+updateUserById: asyncHandler(async (req, res) => {
+  const requester = await User.findById(req.user);
+  if (!requester || requester.role !== 'Admin') {
+    res.status(403);
+    throw new Error("Access denied. Only admins can update users.");
+  }
+
+  const userId = req.params.userId;
+  const {
+    email, username, password,
+    firstName, lastName, phoneNumber, university,
+    department, designation, fullName, role
+  } = req.body;
+
+  const user = await User.findById(userId);
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  if (password && password.trim() !== "") {
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+  }
+
+  user.email = email || user.email;
+  user.username = username || user.username;
+  user.firstName = firstName || user.firstName;
+  user.lastName = lastName || user.lastName;
+  user.phoneNumber = phoneNumber || user.phoneNumber;
+  user.university = university || user.university;
+  user.department = department || user.department;
+  user.designation = designation || user.designation;
+  user.fullName = fullName || user.fullName;
+  user.role = role || user.role;
+
+  if (req.file) {
+    const existingImage = await UserImage.findOne({ user: userId });
+    if (existingImage?.publicId) {
+      await cloudinary.uploader.destroy(existingImage.publicId);
+    }
+
+    const cloudinaryResult = await uploadToCloudinary(req.file.buffer, 'user_profile_images', userId);
+
+    if (existingImage) {
+      existingImage.imageUrl = cloudinaryResult.secure_url;
+      existingImage.publicId = cloudinaryResult.public_id;
+      await existingImage.save();
+    } else {
+      await new UserImage({
+        user: userId,
+        imageUrl: cloudinaryResult.secure_url,
+        publicId: cloudinaryResult.public_id
+      }).save();
+    }
+  }
+
+  await user.save();
+
+  const updatedUser = await User.findById(userId).select("-password");
+  const userImage = await UserImage.findOne({ user: userId });
+  const userProfile = updatedUser.toObject();
+  userProfile.profileImageUrl = userImage?.imageUrl || null;
+
+  res.status(200).json({ message: "User updated successfully", user: userProfile });
+}),
+
+
 
   //!Logout
   logout: asyncHandler(async (req, res) => {
