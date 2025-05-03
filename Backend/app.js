@@ -11,6 +11,7 @@ const classroomRouter = require('./routes/classroomRouter');
 const quizResultRouter = require("./routes/quizResultRouter"); // Import the new router
 const errorHandler = require("./middlewares/errorHandler");
 const cookieParser = require('cookie-parser');
+const studentActivityRouter = require("./routes/studentActivityRouter");
 
 dotenv.config();
 const dburl = process.env.MONGO_URI;
@@ -43,7 +44,11 @@ app.use(express.json()); // Parse JSON request body
 app.use("/api/users", userRouter);
 app.use("/api/conference", conferenceRouter);
 app.use('/api/classrooms', classroomRouter);
+
+app.use("/api/studentactivity", studentActivityRouter);
+
 app.use("/api/quizresults", quizResultRouter); // Use the new router
+
 
 //! Initialize Socket.io
 initializeSocket(io);

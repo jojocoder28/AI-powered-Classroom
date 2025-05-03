@@ -23,9 +23,11 @@ const RagChat = () => {
   // Quiz State
   const [quiz, setQuiz] = useState(null);
   const [userAnswers, setUserAnswers] = useState({});
-  const [quizResult, setQuizResult] = useState(null);
-  const [quizLoading, setQuizLoading] = useState(false);
-  const [submittingQuiz, setSubmittingQuiz] = useState(false);
+  const [quizResult, setQuizResult] = useState(null); // Result of the current quiz
+  const [previousQuizResult, setPreviousQuizResult] = useState(null); // Result of the previous quiz
+  const [quizLoading, setQuizLoading] = useState(false); // For generating quiz
+  const [submittingQuiz, setSubmittingQuiz] = useState(false); // For submitting quiz
+  const [fetchingPreviousResult, setFetchingPreviousResult] = useState(false); // For fetching previous result
   const [currentView, setCurrentView] = useState('chat'); // 'chat' or 'quiz'
 
   // Fetch enrolled classrooms when user is authenticated
@@ -60,7 +62,8 @@ const RagChat = () => {
         setLoading(true);
         setError('');
         setQuiz(null); // Clear quiz when classroom changes
-        setQuizResult(null);
+        setQuizResult(null); // Clear current quiz result
+        setPreviousQuizResult(null); // Clear previous quiz result
         setUserAnswers({});
         setChatHistory([]); // Clear chat when classroom changes
         setRagProcessed(false);
@@ -90,10 +93,45 @@ const RagChat = () => {
       setChatHistory([]);
       setQuiz(null);
       setQuizResult(null);
+      setPreviousQuizResult(null);
       setUserAnswers({});
       setCurrentView('chat'); // Reset view to chat when classroom is cleared
     }
   }, [selectedClassroomId, backend_api]);
+
+  // Fetch previous quiz result when PDFs are processed or selectedClassroomId/user changes
+  useEffect(() => {
+    const fetchPreviousQuizResult = async () => {
+      if (ragProcessed && user?._id && selectedClassroomId && selectedPdfUrls.length > 0) {
+        setFetchingPreviousResult(true);
+        try {
+          // Assuming an endpoint to fetch the latest quiz result for a student, classroom, and set of assignments
+          const response = await axios.get(`${backend_api}/api/quizresults/get`, { // Using POST to send selectedPdfUrls in body
+            studentId: user._id,
+            classroomId: selectedClassroomId,
+            assignmentPaths: selectedPdfUrls,
+          }, { withCredentials: true });
+
+          console.log('Previous quiz result:', response.data.quizResult);
+          if (response.data.quizResult) {
+            setPreviousQuizResult(response.data.quizResult);
+          } else {
+            setPreviousQuizResult(null); // No previous result found
+          }
+
+        } catch (err) {
+          console.error('Error fetching previous quiz result:', err.response?.data?.message || err.message);
+          setPreviousQuizResult(null); // Handle error by setting to null
+        } finally {
+          setFetchingPreviousResult(false);
+        }
+      } else {
+          setPreviousQuizResult(null); // Clear previous result if conditions are not met
+      }
+    };
+
+    fetchPreviousQuizResult();
+  }, []); // Dependencies
 
   const handleClassroomSelect = (e) => {
     setSelectedClassroomId(e.target.value);
@@ -117,7 +155,8 @@ const RagChat = () => {
     setRagProcessed(false);
     setChatHistory([]); // Clear chat history on reprocessing
     setQuiz(null); // Clear quiz on reprocessing
-    setQuizResult(null);
+    setQuizResult(null); // Clear current quiz result on reprocessing
+    setPreviousQuizResult(null); // Clear previous quiz result on reprocessing
     setUserAnswers({});
     setCurrentView('chat'); // Switch to chat view after processing
 
@@ -199,15 +238,16 @@ const RagChat = () => {
     setQuizLoading(true);
     setError('');
     setQuiz(null);
-    setQuizResult(null);
+    setQuizResult(null); // Clear current quiz result
     setUserAnswers({});
     setCurrentView('quiz');
+
 
     const mlBackendUrl = 'http://localhost:5001'; // Or your deployed ML backend URL
 
     try {
       // Assuming a new endpoint /generate_quiz that accepts file_paths
-      const response = await axios.get(`${mlBackendUrl}/quiz-generate`, {
+      const response = await axios.get(`${mlBackendUrl}/quiz-generate`, { // Use POST to send file_paths in body
          file_paths: selectedPdfUrls,
       });
 
@@ -235,8 +275,8 @@ const RagChat = () => {
 
     } catch (err) {
       console.error('Error generating quiz:', err);
-      setError('Failed to generate quiz. Make sure the ML backend is running and the /generate_quiz endpoint is available.');
-      toast.error('Failed to generate quiz. Make sure the AI backend is running and the /generate_quiz endpoint is available.');
+      setError('Failed to generate quiz.');
+      toast.error('Failed to generate quiz.');
       setCurrentView('chat'); // Go back to chat view on API error
     } finally {
       setQuizLoading(false);
@@ -255,15 +295,19 @@ const RagChat = () => {
     let score = 0;
     const detailedResults = quiz.map((q, index) => {
       const selected = userAnswers[index] || 'Not attempted';
-      const correct = q.correct_answer === selected;
-      if (correct) score++;
-      return {
-        question: q.question,
-        selectedAnswer: selected, // Use selectedAnswer to match backend schema
-        correctAnswer: q.correct_answer, // Use correctAnswer to match backend schema
-        isCorrect: correct,
-      };
-    });
+      const correctAnswer = Array.isArray(q.correct_answer) ? q.correct_answer.join(', ') : q.correct_answer;
+  const correct = Array.isArray(q.correct_answer)
+      ? q.correct_answer.includes(selected)
+      : q.correct_answer === selected;
+
+  if (correct) score++;
+  return {
+    question: q.question,
+    selectedAnswer: selected,
+    correctAnswer: correctAnswer,
+    isCorrect: correct,
+  };
+});
 
     const totalQuestions = quiz.length;
     const percentage = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0;
@@ -418,7 +462,7 @@ return (
              <button
               onClick={handleGenerateQuiz}
               disabled={quizLoading || loading || mlLoading}
-               className={`w-full py-2 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition duration-150 ease-in-out ${currentView === 'quiz' ? 'bg-teal-700 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'} ${(quizLoading || loading || mlLoading) && 'opacity-50 cursor-not-allowed'}`}
+               className={`w-full py-2 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition duration-150 ease-in-out ${currentView === 'quiz' ? 'bg-teal-700 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'} ${(quizLoading || loading || mlLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
                <FontAwesomeIcon icon={quizLoading ? faSpinner : faQuestionCircle} spin={quizLoading} /> Generate Quiz
             </button>
@@ -486,6 +530,20 @@ return (
                Course Quiz
              </h3>
 
+             {/* Display Previous Quiz Result */}
+             {fetchingPreviousResult ? (
+                <p className="text-center text-gray-600 mt-4"><FontAwesomeIcon icon={faSpinner} spin /> Checking for previous results...</p>
+             ) : previousQuizResult ? (
+               <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg shadow-sm">
+                 <h4 className="text-lg font-semibold text-blue-800 flex items-center gap-2 mb-2">
+                    <FontAwesomeIcon icon={faClock} /> Your Previous Result:
+                 </h4>
+                 <p className="text-blue-700">Score: {previousQuizResult.score} / {previousQuizResult.totalQuestions} ({previousQuizResult.percentage.toFixed(2)}%)</p>
+               </div>
+             ) : (ragProcessed && selectedClassroomId && selectedPdfUrls.length > 0 && !quizLoading && !quizResult && (
+                <p className="text-center text-gray-600 mt-4 text-sm">No previous quiz result found for these documents.</p>
+             ))}
+
              {quizLoading && <p className="text-center text-gray-600 mt-10"><FontAwesomeIcon icon={faSpinner} spin /> Crafting your quiz...</p>}
 
              {quiz && quiz.length > 0 && !quizResult && (
@@ -552,11 +610,16 @@ return (
                    Could not generate a quiz from the selected documents.
                  </div>
               )}
+             {!ragProcessed && quiz === null && !quizLoading && !quizResult && (
+                  <div className="text-center text-gray-600 mt-10">
+                   Process documents first to generate a quiz.
+                  </div>
+             )}
           </div>
        )}
 
        {/* Initial State when no class/pdfs selected or processed */}
-       {!selectedClassroomId && chatHistory.length === 0 && !mlLoading && !quizLoading && !quiz && (
+       {!selectedClassroomId && chatHistory.length === 0 && !mlLoading && !quizLoading && !quiz && !fetchingPreviousResult && (
            <div className="text-center text-gray-600 mt-20">
               <p className="text-lg mb-4">Welcome to AI Learn!</p>
               <p>Select a classroom and relevant assignments from the left panel to get started.</p>
