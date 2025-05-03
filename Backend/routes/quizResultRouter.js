@@ -1,5 +1,6 @@
 const express = require("express");
 const quizResultController = require("../controller/quizResultController");
+const isAuthenticated = require("../middlewares/isAuth");
 const isStudentAuthenticated = require("../middlewares/isStudentAuthenticated"); // Assuming you have this middleware
 
 const router = express.Router();
@@ -12,5 +13,6 @@ router.post('/save', isStudentAuthenticated, quizResultController.saveQuizResult
 // Using POST for simplicity to send assignmentPaths in the body, adjust to GET with query params if preferred.
 router.post('/history', isStudentAuthenticated, quizResultController.getStudentQuizResults);
 
+router.get('/get', isStudentAuthenticated, quizResultController.getQuizResult);
 
 module.exports = router;

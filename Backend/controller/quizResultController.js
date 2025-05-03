@@ -67,3 +67,33 @@ exports.getStudentQuizResults = asyncHandler(async (req, res, next) => {
      next(error);
   }
 });
+
+
+exports.getQuizResult = asyncHandler(async (req, res, next) => {
+  const { studentId, classroomId, assignmentPaths } = req.body;
+
+  if (!studentId || !classroomId || !assignmentPaths || !Array.isArray(assignmentPaths)) {
+     return next(new ErrorHandler("Please provide studentId, classroomId, and assignmentPaths (as an array) to fetch the quiz result", 400));
+  }
+const quizResult = await QuizResult.findOne({
+  student: studentId,
+  classroom: classroomId,
+  assignmentPaths: { $all: assignmentPaths, $size: assignmentPaths.length },
+})
+.sort({ createdAt: -1 }) // Get the latest result
+.limit(1);
+
+if (!quizResult) {
+  // No result found is not an error, just means no previous result exists
+  return res.status(200).json({
+    success: true,
+    quizResult: null,
+    message: "No previous quiz result found for these documents."
+  });
+}
+
+res.status(200).json({
+  success: true,
+  quizResult,
+});
+});
